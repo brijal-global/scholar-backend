@@ -1,0 +1,101 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: postgres-${POSTGRES_DATABASE}
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${POSTGRES_MAX_MEMORY}M
+        reservations:
+          memory: ${POSTGRES_MIN_MEMORY}M
+    networks:
+      - ${APP_NAME}-network
+
+  redis:
+    image: redis:8.2-alpine
+    container_name: redis-${REDIS_DATABASE}
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD} --bind 0.0.0.0 --port ${REDIS_PORT}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - redis-data:/data:rw
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${REDIS_MAX_MEMORY}M
+        reservations:
+          memory: ${REDIS_MIN_MEMORY}M
+    networks:
+      - ${APP_NAME}-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV}
+        MAX_MEMORY: ${MAX_MEMORY}
+    image: ${APP_NAME}-${NODE_ENV}:latest
+    container_name: ${APP_NAME}-${NODE_ENV}
+    restart: unless-stopped
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    # volumes:
+    #   # Mounting the entire project root for hot-reloading in development (excluding what's in .dockerignore): only for development environment
+    #   - .:/app:delegated
+    #   # Prevent overwriting node_modules in container
+    #   - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "${BACKEND_MAIN_URL}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${MAX_MEMORY}M
+        reservations:
+          memory: ${MIN_MEMORY}M
+    networks:
+      - ${APP_NAME}-network
+
+networks:
+  scholar-backend-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local

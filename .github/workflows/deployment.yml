@@ -1,0 +1,104 @@
+name: Scholar Backend Deployment
+
+on:
+  push:
+    branches: [development, production]
+
+env:
+  PROJECT_NAME: scholar-backend
+  BRANCH_NAME: ${{ github.ref_name }}
+  RUN_NUMBER: ${{ github.run_number }}
+  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+  SSH_HOST: ${{ secrets[format('SSH_HOST_{0}', github.ref_name)] }}
+  SSH_USER: ${{ secrets[format('SSH_USER_{0}', github.ref_name)] }}
+  SSH_PASS: ${{ secrets[format('SSH_PASS_{0}', github.ref_name)] }}
+  SSH_KEY: ${{ secrets[format('SSH_KEY_{0}', github.ref_name)] }}
+  APP_ENV: ${{ secrets[format('APP_ENV_{0}', github.ref_name)] }}
+  NODE_ENV: ${{ github.ref_name }}
+  WORKDIR: /app
+  SSH_KEY_PATH: /tmp/${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.run_number }}/ssh_key.pem
+  BUILD_NAME: ${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.run_number }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          platforms: linux/arm64
+
+      - name: Copy code to action's temporary directory
+        run: |
+          mkdir -p /tmp/${{ env.BUILD_NAME }}
+          cp -r . /tmp/${{ env.BUILD_NAME }}/
+          cd /tmp/${{ env.BUILD_NAME }}
+          rm -rf .git .github .vscode node_modules
+          echo "${{ env.APP_ENV }}" > .env.${{ env.NODE_ENV }}
+
+      - name: Zip the source-code
+        run: |
+          cd /tmp/${{ env.BUILD_NAME }}
+          zip -r ${{ env.BUILD_NAME }}.zip .
+
+      - name: Save the SSH_KEY to the action's temporary directory
+        run: |
+          echo "${{ env.SSH_KEY }}" > ${{ env.SSH_KEY_PATH }}
+          chmod 600 ${{ env.SSH_KEY_PATH }}
+
+      - name: Add host to known hosts on action's server
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create required directories on VM
+        run: |
+          ssh -i ${{ env.SSH_KEY_PATH }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'EOF'
+            mkdir -p ~/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME }}
+          EOF
+
+      - name: Send the zipped source-code to the VM
+        run: |
+          cd /tmp/${{ env.BUILD_NAME }}
+          scp -i ${{ env.SSH_KEY_PATH }} -r ${{ env.BUILD_NAME }}.zip ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:~/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME }}.zip
+
+      - name: Unzip the source-code on the VM, remove the zip file and deploy with Docker Compose
+        run: |
+          ssh -i ${{ env.SSH_KEY_PATH }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'EOF'
+            # Install unzip if not present
+            if ! command -v unzip &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y unzip
+            fi
+
+            cd ~/projects/${{ env.PROJECT_NAME }}
+
+            # Remove existing build directory and extract fresh
+            rm -rf ${{ env.BUILD_NAME }}
+            mkdir -p ${{ env.BUILD_NAME }}
+            unzip -o ${{ env.BUILD_NAME }}.zip -d ${{ env.BUILD_NAME }}
+            rm -f ${{ env.BUILD_NAME }}.zip
+            cd ${{ env.BUILD_NAME }}
+            
+            # Verify the env file exists
+            if [ ! -f ".env.${{ env.NODE_ENV }}" ]; then
+              echo "Error: .env.${{ env.NODE_ENV }} not found after extraction"
+              ls -la
+              exit 1
+            fi
+
+            # Stop the existing app containers
+            sudo docker rm -f ${{ env.PROJECT_NAME }}-${{ env.NODE_ENV }}
+            sudo docker rm -f postgres-scholar-dev
+            sudo docker rm -f redis-scholar-dev
+
+            # Remove the unused and dangling images
+            sudo docker image prune -a -f
+
+            # Deploy with Docker Compose
+            echo "Deploying with Docker Compose... ${{ env.BUILD_NAME }}"
+            sudo docker compose --env-file=.env.${{ env.NODE_ENV }} -p ${{ env.BUILD_NAME }} up -d --build --force-recreate
+          EOF

@@ -1,0 +1,13 @@
+node_modules
+data
+.git
+.gitignore
+README.md
+.dockerignore
+Dockerfile
+docker-compose.yml
+*.log
+coverage
+dist
+build
+public/backup

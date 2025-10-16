@@ -1,0 +1,17 @@
+{
+  "watch": ["./"],
+  "ext": "js,json,ejs",
+  "ignore": [
+    "node_modules/**/*",
+    "public/backup/**/*",
+    ".git/**/*",
+    "*.log",
+    "coverage/**/*",
+    "dist/**/*",
+    "build/**/*"
+  ],
+  "legacyWatch": true,
+  "verbose": true,
+  "delay": 500
+}
+

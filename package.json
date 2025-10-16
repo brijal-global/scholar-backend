@@ -1,0 +1,81 @@
+{
+  "name": "scholar-backend",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.9.2"
+  },
+  "description": "Scholar | By Fleebug Inc.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": "./index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:local": "cross-env NODE_ENV=local nodemon index.js",
+    "dev:server": "cross-env NODE_ENV=development node index.js",
+    "start": "cross-env NODE_ENV=production node index.js"
+  },
+  "keywords": [],
+  "author": "Pushkar Kumar Sah",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fleebug-global/scholar-backend"
+  },
+  "bugs": {
+    "url": "https://github.com/fleebug-global/scholar-backend/issues"
+  },
+  "homepage": "https://github.com/fleebug-global/scholar-backend",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.7.0",
+    "cls-hooked": "^4.2.2",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "esm-module-alias": "^2.2.1",
+    "express": "^5.1.0",
+    "express-http-context": "^2.0.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.1.0",
+    "express-session": "^1.18.2",
+    "glob": "^11.0.3",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "node-match-path": "^0.6.3",
+    "nodemailer": "^7.0.9",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.1",
+    "passport-linkedin-oauth2": "^2.0.0",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7",
+    "serverless-http": "^4.0.0",
+    "streamifier": "^0.1.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.4.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "sequelize-cli": "^6.6.3"
+  },
+  "aliases": {
+    "@": "./"
+  }
+}
