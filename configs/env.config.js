@@ -4,6 +4,11 @@ dotenv.config({
   path: `.env.${process.env.NODE_ENV}`,
 });
 
+export const github = {
+  runNumber: process.env.GITHUB_RUN_NUMBER,
+  commitMessage: process.env.GITHUB_COMMIT_MESSAGE,
+};
+
 // Server Configuration
 export const server = {
   appName: process.env.APP_NAME,

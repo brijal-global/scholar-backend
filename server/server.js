@@ -21,7 +21,7 @@ import passportLinkedInConfig from "./passport/linkedin.passport.js";
 import errorResponse from "./utils/responses/errorResponse.js";
 import { setIp } from "./middlewares/ip.middleware.js";
 import { setupSwagger } from "./lib/swagger.js";
-import { frontend, database, server } from "../configs/env.config.js";
+import { frontend, database, server, github } from "../configs/env.config.js";
 import { limiter, sessionConfig } from "../configs/server.config.js";
 
 const app = express();
@@ -102,7 +102,9 @@ app.get("/health", (req, res, next) => {
         ip: req.ip || "Not Found!",
         ips: req.ips || "Not Found!",
         clientIp: req.clientIp || "Not Found!",
-        env: server.env || "Not Found!",
+        nodeEnv: server.env || "Not Found!",
+        runNumber: github.runNumber || "Not Found!",
+        commitMessage: github.commitMessage || "Not Found!",
       },
       source: "/health [GET]",
     });
