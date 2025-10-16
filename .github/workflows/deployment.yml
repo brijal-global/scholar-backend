@@ -39,8 +39,8 @@ jobs:
           cd /tmp/${{ env.BUILD_NAME }}
           rm -rf .git .github .vscode node_modules
           echo "${{ env.APP_ENV }}" > .env.${{ env.NODE_ENV }}
-          echo "\nGITHUB_RUN_NUMBER=${{ env.RUN_NUMBER }}" >> .env.${{ env.NODE_ENV }}
-          echo "\nGITHUB_COMMIT_MESSAGE=${{ env.COMMIT_MESSAGE }}" >> .env.${{ env.NODE_ENV }}
+          echo "GITHUB_RUN_NUMBER=${{ env.RUN_NUMBER }}" >> .env.${{ env.NODE_ENV }}
+          echo "GITHUB_COMMIT_MESSAGE=${{ env.COMMIT_MESSAGE }}" >> .env.${{ env.NODE_ENV }}
 
       - name: Zip the source-code
         run: |
