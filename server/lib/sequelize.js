@@ -83,11 +83,9 @@ const sequelize = new Sequelize(
 
 // Load all model files and initialize models
 const moduleModels = sync(
-  path.join(__dirname, "../../src/modules/**/*.model.js"),
+  path.join(__dirname, "../../src/modules/**/model.js"),
 );
-const coreModels = sync(
-  path.join(__dirname, "../../server/core/**/*.model.js"),
-);
+const coreModels = sync(path.join(__dirname, "../../server/core/**/model.js"));
 
 const allModels = [...moduleModels, ...coreModels];
 

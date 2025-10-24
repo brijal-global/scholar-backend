@@ -9,6 +9,10 @@ node_modules/
 # uploads
 public/uploads/
 
+# temporary data
+temp/
+tmp/
+
 # Optional eslint cache
 .eslintcache
 

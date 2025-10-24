@@ -53,7 +53,7 @@ if (server.env === "local" || server.env === "development") {
     cors({
       origin: frontend.mainUrl,
       credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      methods: ["GET", "POST", "PUT", "DELETE"],
     }),
   );
   app.use(morgan("dev", {})); // Dev logging format
@@ -62,7 +62,7 @@ if (server.env === "local" || server.env === "development") {
     cors({
       origin: frontend.mainUrl,
       credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      methods: ["GET", "POST", "PUT", "DELETE"],
     }),
   );
   app.use(morgan("combined", {})); // More detailed logging for production

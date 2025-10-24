@@ -1,7 +1,7 @@
 import CommonEntity from "../../../configs/common.entities.js";
 
 export default (sequelize, DataTypes) => {
-  const Inquiry = sequelize.define("inquiry", {
+  const Inquiries = sequelize.define("inquiries", {
     ...CommonEntity,
 
     fullName: {
@@ -16,13 +16,13 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING(16),
       allowNull: false,
     },
-    companyName: {
+    organizationName: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
     message: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM("pending", "resolved", "rejected"),
@@ -35,5 +35,5 @@ export default (sequelize, DataTypes) => {
     },
   });
 
-  return Inquiry;
+  return Inquiries;
 };

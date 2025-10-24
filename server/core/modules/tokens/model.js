@@ -1,34 +1,37 @@
 import CommonEntity from "../../../../configs/common.entities.js";
 
 export default (sequelize, DataTypes) => {
-  const AccessToken = sequelize.define("accessToken", {
+  const Tokens = sequelize.define("tokens", {
     ...CommonEntity,
 
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "user",
+        model: "users",
         key: "userId",
       },
     },
-    accessToken: {
-      type: DataTypes.TEXT,
+    token: {
+      type: DataTypes.STRING(512),
       allowNull: false,
     },
-    isActive: {
+    isUsed: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
+    },
+    type: {
+      type: DataTypes.ENUM("emailVerification", "passwordReset"),
+      allowNull: false,
     },
   });
 
-  AccessToken.associate = (models) => {
-    AccessToken.belongsTo(models.user, {
+  Tokens.associate = (models) => {
+    Tokens.belongsTo(models.users, {
       foreignKey: "userId",
-      as: "user",
-      onDelete: "CASCADE",
+      as: "users",
     });
   };
 
-  return AccessToken;
+  return Tokens;
 };

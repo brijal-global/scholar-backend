@@ -1,6 +1,6 @@
 import passport from "passport";
 import { match } from "node-match-path";
-import publicPermission from "../../src/modules/user/public/public.permissions.js";
+import publicPermission from "../../src/modules/users/public/permissions.js";
 import { AuthException } from "../exceptions/index.js";
 
 const authMiddleware = (req, res, next) => {

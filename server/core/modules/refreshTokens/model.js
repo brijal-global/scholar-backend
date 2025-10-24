@@ -1,14 +1,14 @@
 import CommonEntity from "../../../../configs/common.entities.js";
 
 export default (sequelize, DataTypes) => {
-  const RefreshToken = sequelize.define("refreshToken", {
+  const RefreshTokens = sequelize.define("refreshTokens", {
     ...CommonEntity,
 
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "user",
+        model: "users",
         key: "userId",
       },
     },
@@ -16,20 +16,14 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING(512),
       allowNull: false,
     },
-    timesUsed: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
-    },
   });
 
-  RefreshToken.associate = (models) => {
-    RefreshToken.belongsTo(models.user, {
+  RefreshTokens.associate = (models) => {
+    RefreshTokens.belongsTo(models.users, {
       foreignKey: "userId",
-      as: "user",
-      onDelete: "CASCADE",
+      as: "users",
     });
   };
 
-  return RefreshToken;
+  return RefreshTokens;
 };

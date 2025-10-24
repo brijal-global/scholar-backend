@@ -42,3 +42,13 @@ export function generateRandomPassword() {
 
   return password;
 }
+
+// camel case to hyphen format (accessToken to access-token)
+export function camelCaseToHyphen(string) {
+  return string.replace(/([A-Z])/g, "-$1").toLowerCase();
+}
+
+// hyphen format to camel case (access-token to accessToken)
+export function hyphenToCamelCase(string) {
+  return string.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}

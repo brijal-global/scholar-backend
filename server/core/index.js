@@ -14,7 +14,7 @@ export default async (router) => {
       const fullPath = path.join(dir, entry);
       if (fs.statSync(fullPath).isDirectory()) {
         getRouteFiles(fullPath); // Recursive call for nested folders
-      } else if (entry.endsWith(".route.js")) {
+      } else if (entry === "route.js") {
         routes.push(fullPath);
       }
     });
