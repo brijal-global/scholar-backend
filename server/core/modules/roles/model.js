@@ -7,7 +7,10 @@ export default (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING(64),
       allowNull: false,
-      unique: true,
+      unique: {
+        args: true,
+        msg: "Role already exists!",
+      },
     },
     description: {
       type: DataTypes.TEXT,

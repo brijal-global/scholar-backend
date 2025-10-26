@@ -19,4 +19,9 @@ export default [
     methods: ["GET"],
     route: "/api/auth/signout",
   },
+  // signup routes: modify this as per need for new roles
+  {
+    methods: ["POST"],
+    route: "/api/auth/signup/customer",
+  },
 ];

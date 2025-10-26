@@ -54,7 +54,6 @@ const jwtPassportConfig = (passport) => {
                 required: true,
               },
             ],
-            raw: true,
           });
 
           if (!user) return done(null, false);
@@ -82,7 +81,7 @@ const jwtPassportConfig = (passport) => {
           delete user?.password;
 
           // Return authenticated user
-          return done(null, user);
+          return done(null, user?.toJSON() || null);
         } catch (err) {
           // In case of error, pass it to done()
           console.error("Error in jwt.passport.js: ", err);

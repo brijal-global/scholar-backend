@@ -58,12 +58,12 @@ const refreshUserToken = async (req, res, next) => {
 
     const newAccessToken = await signAccessToken(
       existingUser?.userId,
-      existingUser?.role?.name,
+      existingUser?.role.name,
     );
 
     const newRefreshToken = await signRefreshToken(
       existingUser?.userId,
-      existingUser?.role?.name,
+      existingUser?.role.name,
     );
 
     const newAccessTokenPayload = {

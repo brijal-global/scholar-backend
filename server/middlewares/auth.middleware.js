@@ -1,6 +1,6 @@
 import passport from "passport";
 import { match } from "node-match-path";
-import publicRoutes from "../../src/permissions/public.js";
+import publicRoutes from "../../configs/publicRoutes.js";
 import { AuthException } from "../exceptions/index.js";
 
 const authMiddleware = (req, res, next) => {
