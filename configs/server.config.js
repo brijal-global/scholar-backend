@@ -28,3 +28,11 @@ export const sessionConfig = {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 };
+
+export const cookieConfig = {
+  secure: true,
+  httpOnly: true,
+  path: "/",
+  ...(server.env === "production" ? { sameSite: `lax` } : { sameSite: `none` }), // samesite lax only in production
+  ...(server.env === "production" && { domain: `.${server.mainDomain}` }), // domain only in production
+};

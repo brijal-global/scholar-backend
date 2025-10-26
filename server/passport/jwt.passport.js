@@ -4,7 +4,7 @@ import { isUserAllowed } from "../../configs/permission.js";
 
 import { models } from "../../configs/server.config.js";
 
-const { accessToken } = models;
+const { users, accessTokens, roles } = models;
 
 let extractedAccessToken = null;
 
@@ -38,18 +38,20 @@ const jwtPassportConfig = (passport) => {
        */
       async (req, jwt_payload, done) => {
         try {
-          const { userType, sub } = jwt_payload;
+          const { sub } = jwt_payload;
 
           extractedAccessToken = extractAccessToken(req);
 
           if (!extractedAccessToken) return done(null, false);
 
-          const user = await models[userType]?.findOne({
+          const user = await users.findOne({
             where: { userId: sub },
             include: [
               {
-                model: models.user,
-                as: "user",
+                model: roles,
+                as: "role",
+                attributes: ["name"],
+                required: true,
               },
             ],
           });
@@ -57,11 +59,12 @@ const jwtPassportConfig = (passport) => {
           if (!user) return done(null, false);
 
           // Fetch the access token information
-          const accessTokenRecord = await accessToken.findOne({
+          const accessTokenRecord = await accessTokens.findOne({
             where: {
               accessToken: extractedAccessToken,
               isActive: true,
             },
+            raw: true,
           });
 
           if (!accessTokenRecord) return done(null, false);
@@ -70,7 +73,7 @@ const jwtPassportConfig = (passport) => {
           const route = req.originalUrl;
           const method = req.method;
 
-          const isAllowed = await isUserAllowed(route, method, userType);
+          const isAllowed = await isUserAllowed(route, method, user.roleId);
 
           if (!isAllowed) return done(null, false);
 
@@ -78,7 +81,7 @@ const jwtPassportConfig = (passport) => {
           delete user?.password;
 
           // Return authenticated user
-          return done(null, user);
+          return done(null, user?.toJSON() || null);
         } catch (err) {
           // In case of error, pass it to done()
           console.error("Error in jwt.passport.js: ", err);

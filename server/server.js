@@ -125,7 +125,7 @@ setupSwagger(app);
 app.use((req, res, next) => {
   const err = new Error();
   err.status = 404;
-  err.message = "Not Found";
+  err.message = "Route Not Found!";
   next(err);
 });
 
