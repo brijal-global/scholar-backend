@@ -40,7 +40,7 @@ jobs:
           rm -rf .git .github .vscode node_modules
           echo "${{ env.APP_ENV }}" > .env.${{ env.NODE_ENV }}
           echo "GITHUB_RUN_NUMBER=${{ env.RUN_NUMBER }}" >> .env.${{ env.NODE_ENV }}
-          echo "GITHUB_COMMIT_MESSAGE=${{ env.COMMIT_MESSAGE }}" >> .env.${{ env.NODE_ENV }}
+          echo "GITHUB_COMMIT_MESSAGE=$(echo '${{ env.COMMIT_MESSAGE }}' | tr -d '\n\r' | sed 's/[^a-zA-Z0-9 ._-]//g')" >> .env.${{ env.NODE_ENV }}
 
       - name: Zip the source-code
         run: |
