@@ -1,11 +1,11 @@
 import passport from "passport";
 import { match } from "node-match-path";
-import publicPermission from "../../src/modules/users/public/permissions.js";
+import publicRoutes from "../../src/permissions/public.js";
 import { AuthException } from "../exceptions/index.js";
 
 const authMiddleware = (req, res, next) => {
   try {
-    const isPublicRoute = publicPermission.some((item) => {
+    const isPublicRoute = publicRoutes.some((item) => {
       const { matches } = match(item.route, req.path);
       const isMethodMatch = item.methods.includes(req.method);
       return matches && isMethodMatch;
@@ -23,7 +23,10 @@ const authMiddleware = (req, res, next) => {
               err,
             );
 
-            throw new AuthException("unauthorized", "auth");
+            throw new AuthException(
+              "Unauthorized! Not enough permissions!",
+              "auth",
+            );
           } else {
             req.user = user;
             next();

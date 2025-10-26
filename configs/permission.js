@@ -1,45 +1,23 @@
-import fs from "fs";
-import path from "path";
+import { models } from "./server.config.js";
+import commonProtectedRoutes from "./commonProtectedRoutes.js";
 
-const commonProtectedRoutes = [
-  {
-    methods: ["GET"],
-    route: "/api/auth/me",
-  },
-  {
-    methods: ["POST"],
-    route: "/api/auth/refresh",
-  },
-  {
-    methods: ["PUT"],
-    route: "/api/auth/update-my-profile",
-  },
-  {
-    methods: ["PUT"],
-    route: "/api/auth/change-my-password",
-  },
-];
+const { roles, permissions } = models;
 
-const isUserAllowed = async (route, method, userType) => {
-  if (userType === "superAdmin") return true;
+const isUserAllowed = async (route, method, roleId) => {
+  const sanitizedRoute = route.replace(/:\w+/g, "[^/]+");
+  const sanitizedMethod = method.toUpperCase();
 
-  const permissionsPath = path.resolve(
-    `src/modules/user/${userType}/${userType}.permissions.js`,
-  );
+  const role = await roles.findByPk(roleId, {
+    attributes: ["id", "name"],
+    raw: true,
+  });
 
-  if (!fs.existsSync(permissionsPath)) {
-    console.error(`Permissions are not specified for user type: ${userType}.`);
-    return false;
-  }
+  if (!role) return false;
 
-  const allowedRoutes = (await import(permissionsPath))?.default;
-
-  allowedRoutes.push(...commonProtectedRoutes);
-
-  if (!allowedRoutes) return false;
+  if (role?.name === "superAdmin") return true;
 
   // Check if the route and method match
-  const isMatch = allowedRoutes.some((item) => {
+  const isCommonProtectedRoute = commonProtectedRoutes.some((item) => {
     const normalizedMethods = item.methods.map((method) =>
       method.toUpperCase(),
     );
@@ -52,16 +30,27 @@ const isUserAllowed = async (route, method, userType) => {
 
     return (
       routePattern.test(route) && // Check if the route matches the pattern
-      normalizedMethods.includes(method.toUpperCase()) // Check if the method is allowed
+      normalizedMethods.includes(sanitizedMethod) // Check if the method is allowed
     );
   });
 
-  if (!isMatch) {
-    console.error(
-      `User is not authorized to access this resource. [userType: ${userType}] route: ${route} [${method}]`,
-    );
-  }
-  return isMatch;
+  if (isCommonProtectedRoute) return true;
+
+  const permittedRoute = await permissions.findOne({
+    where: {
+      roleId,
+      route: sanitizedRoute,
+      ...(sanitizedMethod === "GET" ? { canView: true } : {}),
+      ...(sanitizedMethod === "POST" ? { canCreate: true } : {}),
+      ...(sanitizedMethod === "PUT" ? { canUpdate: true } : {}),
+      ...(sanitizedMethod === "DELETE" ? { canDelete: true } : {}),
+    },
+    raw: true,
+  });
+
+  if (permittedRoute) return true;
+
+  return false;
 };
 
 export { isUserAllowed };

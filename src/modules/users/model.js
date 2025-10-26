@@ -65,5 +65,12 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Users.associate = (models) => {
+    Users.belongsTo(models.roles, {
+      foreignKey: "roleId",
+      as: "role",
+    });
+  };
+
   return Users;
 };
