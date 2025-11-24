@@ -6,7 +6,7 @@ import isIterable from "../utils/validation/isIterable.js";
 import { postgres, database } from "../../configs/env.config.js";
 
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,10 +82,13 @@ const sequelize = new Sequelize(
 );
 
 // Load all model files and initialize models
+// Convert paths to use forward slashes for cross-platform glob compatibility
 const moduleModels = sync(
-  path.join(__dirname, "../../src/modules/**/model.js"),
+  path.join(__dirname, "../../src/modules/**/model.js").replace(/\\/g, "/"),
 );
-const coreModels = sync(path.join(__dirname, "../../server/core/**/model.js"));
+const coreModels = sync(
+  path.join(__dirname, "../../server/core/**/model.js").replace(/\\/g, "/"),
+);
 
 const allModels = [...moduleModels, ...coreModels];
 
@@ -94,9 +97,9 @@ const db = {};
 const loadModels = async () => {
   for (const modelFile of allModels) {
     try {
-      // console.info(`Loading model ::::::  ${modelFile}`);
-
-      const importedModel = await import(modelFile);
+      // Convert to file URL for cross-platform ESM import compatibility
+      const fileUrl = pathToFileURL(modelFile).href;
+      const importedModel = await import(fileUrl);
 
       if (!importedModel.default) {
         console.error(
