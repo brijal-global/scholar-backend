@@ -122,8 +122,7 @@ export const cloudinary = {
 // Database dialect
 export const database = {
   dialect: process.env.DATABASE_DIALECT,
-  // syncMode: process.env.DATABASE_SYNC_MODE,
-  syncMode: "force",
+  syncMode: process.env.DATABASE_SYNC_MODE,
 };
 
 // Redis Configuration
