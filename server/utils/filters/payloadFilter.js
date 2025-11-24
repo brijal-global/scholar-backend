@@ -15,7 +15,11 @@ export const sanitizePayload = (payload, itemsToDelete) => {
   const isSanitized = itemsToDelete.every((item) => !filteredPayload[item]);
 
   if (!isSanitized) {
-    throw new HttpException(400, "Payload is not sanitized!", "auth");
+    throw new HttpException(
+      400,
+      "Payload did not pass the sanitization!",
+      "auth",
+    );
   }
 
   return filteredPayload;
