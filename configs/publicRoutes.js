@@ -5,6 +5,10 @@ export default [
   },
   {
     methods: ["GET"],
+    route: "/favicon.ico",
+  },
+  {
+    methods: ["GET"],
     route: "/api/auth/reset-superadmin",
   },
   {

@@ -8,7 +8,7 @@ import { server } from "./configs/env.config.js";
 app.listen(server.port, "0.0.0.0", (err) => {
   if (err) {
     console.error(
-      `\nError starting the server on port ${server.port}:\n${err}\n`,
+      `\nError starting the server on port ${server?.port}:\n${err}\n`,
     );
     return;
   }

@@ -2,6 +2,7 @@ import { HttpException, NotFoundException } from "../../../exceptions/index.js";
 import { models } from "../../../../configs/server.config.js";
 import successResponse from "../../../utils/responses/successResponse.js";
 import { camelCaseToHyphen } from "../../../utils/helpers/stringFormatters.js";
+import { formatTitle } from "../../../utils/helpers/stringFormatters.js";
 
 export default (router) => {
   const allModels = Object.keys(models);
@@ -35,7 +36,12 @@ export default (router) => {
         if (!data) {
           throw new NotFoundException(`Not created!`, camelCaseModel);
         }
-        successResponse(res, data, "create", camelCaseModel);
+        successResponse(
+          res,
+          data,
+          `${formatTitle(camelCaseModel?.slice(0, -1))} created successfully!`,
+          camelCaseModel,
+        );
       } catch (err) {
         next(err);
       }
