@@ -133,8 +133,6 @@ export const redis = {
   password: process.env.REDIS_PASSWORD,
   database: process.env.REDIS_DATABASE,
   ssl: process.env.REDIS_SSL,
-  minMemory: process.env.REDIS_MIN_MEMORY,
-  maxMemory: process.env.REDIS_MAX_MEMORY,
 };
 
 // PostgreSQL Configuration
@@ -146,6 +144,4 @@ export const postgres = {
   database: process.env.POSTGRES_DATABASE,
   ssl: process.env.POSTGRES_SSL,
   ca: process.env.POSTGRES_CA,
-  minMemory: process.env.POSTGRES_MIN_MEMORY,
-  maxMemory: process.env.POSTGRES_MAX_MEMORY,
 };
