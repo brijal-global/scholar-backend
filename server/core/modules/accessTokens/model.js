@@ -9,7 +9,7 @@ export default (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: "users",
-        key: "userId",
+        key: "id",
       },
     },
     accessToken: {
@@ -20,7 +20,7 @@ export default (sequelize, DataTypes) => {
 
   AccessTokens.associate = (models) => {
     AccessTokens.belongsTo(models.users, {
-      foreignKey: "userId",
+      foreignKey: "id",
       as: "users",
     });
   };

@@ -51,7 +51,7 @@ passportLinkedInConfig(passport);
 if (server.env === "local" || server.env === "development") {
   app.use(
     cors({
-      origin: frontend.mainUrl,
+      origin: [frontend.mainUrl, frontend.localUrl],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE"],
     }),
@@ -60,7 +60,7 @@ if (server.env === "local" || server.env === "development") {
 } else {
   app.use(
     cors({
-      origin: frontend.mainUrl,
+      origin: [frontend.mainUrl, frontend.localUrl],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE"],
     }),

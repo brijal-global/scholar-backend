@@ -66,18 +66,18 @@ export const processAuth = async (
 
     if (!role) throw new ForbiddenException("Role not found!", "auth.signin");
 
-    const newAccessToken = await signAccessToken(user.userId, role);
+    const newAccessToken = await signAccessToken(user.id, role);
 
-    const newRefreshToken = await signRefreshToken(user.userId, role);
+    const newRefreshToken = await signRefreshToken(user.id, role);
 
     let accessTokenPayload = {
-      userId: user.userId,
+      userId: user.id,
       accessToken: newAccessToken,
       ip: req?.ip,
     };
 
     let refreshTokenPayload = {
-      userId: user.userId,
+      userId: user.id,
       refreshToken: newRefreshToken,
       ip: req?.ip,
     };
@@ -87,10 +87,7 @@ export const processAuth = async (
 
     // Update last login time
     users
-      .update(
-        { lastLogin: getUtcTimestamp() },
-        { where: { userId: user.userId } },
-      )
+      .update({ lastLogin: getUtcTimestamp() }, { where: { id: user.id } })
       .catch((err) => console.error("Error updating last login: ", err));
 
     res.cookie("accessToken", newAccessToken, {

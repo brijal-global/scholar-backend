@@ -28,6 +28,7 @@ export const server = {
 // Frontend
 export const frontend = {
   mainUrl: process.env.FRONTEND_MAIN_URL,
+  localUrl: process.env.FRONTEND_LOCAL_URL,
 };
 
 // Backend

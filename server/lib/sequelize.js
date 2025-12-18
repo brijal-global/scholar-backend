@@ -47,31 +47,31 @@ const sequelize = new Sequelize(
       freezeTableName: true,
       hooks: {
         beforeCreate(instance, options) {
-          if (options.userId) {
-            instance.createdBy = instance.createdBy || options.userId;
-            instance.updatedBy = instance.updatedBy || options.userId;
+          if (options.id) {
+            instance.createdBy = instance.createdBy || options.id;
+            instance.updatedBy = instance.updatedBy || options.id;
           }
         },
         beforeBulkCreate(instances, options) {
           if (isIterable(instances)) {
             instances.forEach((instance) => {
-              if (options.userId) {
-                instance.createdBy = instance.createdBy || options.userId;
-                instance.updatedBy = instance.updatedBy || options.userId;
+              if (options.id) {
+                instance.createdBy = instance.createdBy || options.id;
+                instance.updatedBy = instance.updatedBy || options.id;
               }
             });
           }
         },
         beforeUpdate(instance, options) {
-          if (options.userId) {
-            instance.updatedBy = options.userId;
+          if (options.id) {
+            instance.updatedBy = options.id;
           }
         },
         beforeBulkUpdate(instances, options) {
           if (isIterable(instances)) {
             instances.forEach((instance) => {
-              if (options.userId) {
-                instance.updatedBy = options.userId;
+              if (options.id) {
+                instance.updatedBy = options.id;
               }
             });
           }

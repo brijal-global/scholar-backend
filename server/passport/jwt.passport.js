@@ -45,7 +45,7 @@ const jwtPassportConfig = (passport) => {
           if (!extractedAccessToken) return done(null, false);
 
           const user = await users.findOne({
-            where: { userId: sub },
+            where: { id: sub },
             include: [
               {
                 model: roles,

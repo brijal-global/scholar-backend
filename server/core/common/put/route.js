@@ -40,18 +40,23 @@ export default (router) => {
           throw new HttpException(400, "User's IP not found!", camelCaseModel);
         payload.ip = req?.ip;
 
-        if (req?.user?.userId) payload.updatedBy = req?.user?.userId;
+        if (req?.user?.id) payload.updatedBy = req?.user?.id;
 
         const data = await module?.update(payload, {
           where: { id },
           returning: true,
         });
 
-        if (!data?.[1]?.[0]) {
+        if (!data?.[1]) {
           throw new HttpException(400, `Not updated!`, camelCaseModel);
         }
 
-        successResponse(res, data?.[1]?.[0], "update", camelCaseModel);
+        successResponse(
+          res,
+          data?.[1]?.[0],
+          "Updated successfully!",
+          camelCaseModel,
+        );
       } catch (err) {
         next(err);
       }

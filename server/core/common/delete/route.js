@@ -41,7 +41,7 @@ export default (router) => {
         successResponse(
           res,
           `${camelCaseModel} deleted successfully!`,
-          "delete",
+          "Deleted successfully!",
           camelCaseModel,
         );
       } catch (err) {

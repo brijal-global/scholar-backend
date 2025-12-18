@@ -1,12 +1,8 @@
 import CommonEntities from "../../../configs/common.entities.js";
 
-const { id, ...sanitizedCommonEntities } = CommonEntities;
-
 export default (sequelize, DataTypes) => {
   const Users = sequelize.define("users", {
-    ...sanitizedCommonEntities,
-
-    userId: { ...id },
+    ...CommonEntities,
 
     roleId: {
       type: DataTypes.UUID,
@@ -30,8 +26,11 @@ export default (sequelize, DataTypes) => {
     },
     email: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true,
+      allowNull: true,
+      unique: {
+        args: true,
+        msg: "Email already exists!",
+      },
     },
     isEmailVerified: {
       type: DataTypes.BOOLEAN,
@@ -40,7 +39,10 @@ export default (sequelize, DataTypes) => {
     },
     phone: {
       type: DataTypes.STRING(16),
-      allowNull: true,
+      allowNull: {
+        args: true,
+        msg: "Phone number already exists!",
+      },
     },
     password: {
       type: DataTypes.TEXT,

@@ -17,7 +17,7 @@ export default (sequelize, DataTypes) => {
       allowNull: true,
       references: {
         model: "users",
-        key: "userId",
+        key: "id",
       },
     },
     remarkType: {

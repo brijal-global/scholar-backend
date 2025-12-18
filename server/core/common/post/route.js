@@ -17,8 +17,8 @@ export default (router) => {
     router.route(`/${hyphenatedModel}`).post(async (req, res, next) => {
       try {
         const payload = req?.body || {};
-        payload.createdBy = req?.user?.userId || null;
-        payload.updatedBy = req?.user?.userId || null;
+        payload.createdBy = req?.user?.id || null;
+        payload.updatedBy = req?.user?.id || null;
 
         if (!req?.ip)
           throw new HttpException(400, "User's IP not found!", camelCaseModel);
@@ -36,12 +36,7 @@ export default (router) => {
         if (!data) {
           throw new NotFoundException(`Not created!`, camelCaseModel);
         }
-        successResponse(
-          res,
-          data,
-          `${formatTitle(camelCaseModel?.slice(0, -1))} created successfully!`,
-          camelCaseModel,
-        );
+        successResponse(res, data, `Created successfully!`, camelCaseModel);
       } catch (err) {
         next(err);
       }

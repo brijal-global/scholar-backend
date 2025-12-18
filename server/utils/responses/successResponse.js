@@ -7,7 +7,7 @@ const successResponse = (res, responseData, message, source) => {
 
   const success = new SuccessResponse();
   success.status = 200;
-  success.data = responseData?.rows || [];
+  success.data = responseData?.rows || responseData || [];
   success.pagination = responseData?.pagination || null;
   success.query = responseData?.query || null;
   success.message = message;

@@ -5,21 +5,21 @@ import { models } from "../../configs/server.config.js";
 export default (passport) => {
   passport.serializeUser((user, done) => {
     done(null, {
-      userId: user.userId,
+      id: user.id,
       userType: user.userType,
     });
   });
 
   passport.deserializeUser(async (userObj, done) => {
     try {
-      const { userId, userType } = userObj;
+      const { id, userType } = userObj;
       let user = null;
 
       const userModel = models?.[userType];
 
       if (!userModel) return done(null, null);
 
-      user = await userModel.findOne({ where: { userId } });
+      user = await userModel.findOne({ where: { id } });
 
       done(null, user);
     } catch (err) {
@@ -70,7 +70,7 @@ export default (passport) => {
             user = await userModel.create({
               oAuthId: id,
               oAuthProvider: "google",
-              userId: newUser.userId,
+              id: newUser.id,
               isEmailVerified: true,
               email: profile.emails[0].value,
               name: profile.displayName || "User",

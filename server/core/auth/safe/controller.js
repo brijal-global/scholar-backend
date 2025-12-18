@@ -18,10 +18,10 @@ const resetSuperAdmin = async (req, res, next) => {
 
       for (const user of superAdminUsers) {
         await accessTokens.destroy({
-          where: { userId: user.userId },
+          where: { id: user.id },
         });
         await refreshTokens.destroy({
-          where: { userId: user.userId },
+          where: { id: user.id },
         });
       }
 

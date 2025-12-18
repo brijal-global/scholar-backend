@@ -29,7 +29,7 @@ const updateMyProfile = async (req, res, next) => {
       "oldPassword",
       "newPassword",
       "confirmPassword",
-      "userId",
+      "id",
       "email",
       "confirmEmail",
       "oAuthId",

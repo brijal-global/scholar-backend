@@ -29,10 +29,10 @@ const diskStorage = multer.diskStorage({
   filename: function (req, file, cb) {
     const timestamp = Date.now();
     const randomStr = crypto.randomBytes(4).toString("hex");
-    const userId = req?.user?.id || "unknown";
+    const id = req?.user?.id || "unknown";
 
     // Creating the final filename
-    const filename = `${userId}-${timestamp}-${randomStr}${path.extname(
+    const filename = `${id}-${timestamp}-${randomStr}${path.extname(
       file.originalname,
     )}`;
 

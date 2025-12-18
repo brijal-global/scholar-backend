@@ -36,6 +36,8 @@ export default (router) => {
           dateTo,
           sortBy = "createdAt",
           sortOrder = "DESC",
+          populate = [],
+          conditions = {}, // like
         } = req?.query || {};
 
         const pageValue = parseInt(page) || 1;
@@ -56,8 +58,27 @@ export default (router) => {
             ? searchFields.split(",").map((f) => f.trim())
             : ["id"];
 
+        // Parse conditions if it's a string (from URL)
+        let parsedConditions = {};
+        if (typeof conditions === "string") {
+          try {
+            parsedConditions = JSON.parse(conditions);
+          } catch (err) {
+            // If parsing fails, treat it as empty object
+            console.error("Failed to parse conditions:", err);
+            parsedConditions = {};
+          }
+        } else if (typeof conditions === "object" && conditions !== null) {
+          parsedConditions = conditions;
+        }
+
         // Build WHERE clause for filtering
         const whereClause = {};
+        if (Object.keys(parsedConditions).length > 0) {
+          Object.keys(parsedConditions).forEach((key) => {
+            whereClause[key] = parsedConditions[key];
+          });
+        }
 
         // Status filter
         if (status !== undefined) {
@@ -118,15 +139,8 @@ export default (router) => {
             selectedFields.length > 0 && !selectedFields.includes("*")
               ? selectedFields
               : undefined,
+          include: populate.length > 0 ? populate : undefined,
         };
-
-        // Add this before the findAndCountAll call
-        console.log("Search query:", {
-          search,
-          searchFields: searchFieldArray,
-          whereClause: whereClause,
-          queryOptions,
-        });
 
         const data = await module?.findAndCountAll(queryOptions);
 
@@ -167,7 +181,12 @@ export default (router) => {
           },
         };
 
-        successResponse(res, responseData, "fetch", camelCaseModel);
+        successResponse(
+          res,
+          responseData,
+          "Fetched successfully!",
+          camelCaseModel,
+        );
       } catch (err) {
         next(err);
       }
@@ -187,7 +206,7 @@ export default (router) => {
             camelCaseModel,
           );
         }
-        successResponse(res, data, "fetch", camelCaseModel);
+        successResponse(res, data, "Fetched successfully!", camelCaseModel);
       } catch (err) {
         next(err);
       }

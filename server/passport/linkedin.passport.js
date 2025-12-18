@@ -47,7 +47,7 @@ export default (passport) => {
             user = await userModel.create({
               oAuthId: id,
               oAuthProvider: "linkedin",
-              userId: newUser.userId,
+              id: newUser.id,
               isEmailVerified: true,
               email: profile.emails[0].value,
               name: profile.displayName || "User",

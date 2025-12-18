@@ -38,5 +38,12 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Permissions.associate = (models) => {
+    Permissions.belongsTo(models.roles, {
+      foreignKey: "roleId",
+      as: "role",
+    });
+  };
+
   return Permissions;
 };

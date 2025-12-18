@@ -10,14 +10,14 @@ const { token, user } = models;
 const initiateEmailVerification = async (user, ip) => {
   try {
     const verificationToken = await signGeneralToken({
-      userId: user.userId,
+      id: user.id,
       type: "emailVerification",
       ip: ip,
     });
 
     // save the token in the database
     const tokenPayload = {
-      userId: user.userId,
+      id: user.id,
       token: verificationToken,
       type: "emailVerification",
       ip: ip,
@@ -120,7 +120,7 @@ const verifyEmail = async (req, res) => {
 
     // pre set condition and update
     const condition = {
-      userId: savedToken.user.userId,
+      id: savedToken.user.id,
     };
 
     const payload = {

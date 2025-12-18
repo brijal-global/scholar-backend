@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
         key: "id",
       },
     },
+    name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
     maxAllowedStudents: {
       type: DataTypes.INTEGER,
       allowNull: false,

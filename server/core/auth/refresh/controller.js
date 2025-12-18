@@ -31,12 +31,12 @@ const refreshUserToken = async (req, res, next) => {
 
     if (
       !existingRefreshToken ||
-      existingRefreshToken.userId !== refreshTokenPayload?.sub
+      existingRefreshToken.id !== refreshTokenPayload?.sub
     )
       throw new AuthException("Invalid refresh token!", "auth.refresh");
 
     const existingUser = await users.findOne({
-      where: { userId: existingRefreshToken.userId },
+      where: { id: existingRefreshToken.id },
       raw: true,
       include: [
         {
@@ -57,23 +57,23 @@ const refreshUserToken = async (req, res, next) => {
     );
 
     const newAccessToken = await signAccessToken(
-      existingUser?.userId,
+      existingUser?.id,
       existingUser?.role.name,
     );
 
     const newRefreshToken = await signRefreshToken(
-      existingUser?.userId,
+      existingUser?.id,
       existingUser?.role.name,
     );
 
     const newAccessTokenPayload = {
-      userId: existingUser?.userId,
+      id: existingUser?.id,
       accessToken: newAccessToken,
       ip: req?.ip,
     };
 
     const newRefreshTokenPayload = {
-      userId: existingUser?.userId,
+      id: existingUser?.id,
       refreshToken: newRefreshToken,
       ip: req?.ip,
     };
