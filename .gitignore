@@ -3,7 +3,7 @@ build/Release
 dist/
 data/
 
-# Dependency directories and files
+# Dependency directories
 node_modules/
 
 # uploads
