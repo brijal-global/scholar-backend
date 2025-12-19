@@ -8,10 +8,11 @@
     "*.log",
     "coverage/**/*",
     "dist/**/*",
-    "build/**/*"
+    "build/**/*",
+    "nodemon.json"
   ],
   "legacyWatch": true,
   "verbose": true,
-  "delay": 500
+  "delay": 1000
 }
 

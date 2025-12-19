@@ -1,6 +1,6 @@
 import passport from "passport";
 
-import { processAuth } from "../signin/controller.js";
+import { processAuth } from "../../signin/controller.js";
 
 export default (router) => {
   router.route("/auth/linkedin/callback").get((req, res, next) => {

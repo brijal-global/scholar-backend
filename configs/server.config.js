@@ -36,3 +36,16 @@ export const cookieConfig = {
   ...(server.env === "production" ? { sameSite: `lax` } : { sameSite: `none` }), // samesite lax only in production
   ...(server.env === "production" && { domain: `.${server.mainDomain}` }), // domain only in production
 };
+
+export const oAuthConfigs = {
+  google: {
+    available: true,
+    url: "/api/auth/signin/google",
+    callbackURL: "/api/auth/google/callback",
+  },
+  linkedin: {
+    available: false,
+    url: "/api/auth/signin/linkedin",
+    callbackURL: "/api/auth/linkedin/callback",
+  },
+};
