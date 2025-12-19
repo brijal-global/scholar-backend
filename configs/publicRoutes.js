@@ -27,9 +27,12 @@ export default [
     methods: ["GET"],
     route: "/api/auth/oauth/configs",
   },
-  // signup routes: modify this as per need for new roles
   {
-    methods: ["POST"],
-    route: "/api/auth/signup/customer",
+    methods: ["GET"],
+    route: "/api/auth/google",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/auth/google/callback",
   },
 ];

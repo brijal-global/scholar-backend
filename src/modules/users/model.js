@@ -61,6 +61,18 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    oAuthId: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: {
+        args: true,
+        msg: "OAuth ID already exists!",
+      },
+    },
+    oAuthProvider: {
+      type: DataTypes.STRING(32),
+      allowNull: true,
+    },
     isTermsAndConditionsAccepted: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

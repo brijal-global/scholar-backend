@@ -6,16 +6,15 @@ export default (passport) => {
   passport.serializeUser((user, done) => {
     done(null, {
       id: user.id,
-      userType: user.userType,
     });
   });
 
   passport.deserializeUser(async (userObj, done) => {
     try {
-      const { id, userType } = userObj;
+      const { id } = userObj;
       let user = null;
 
-      const userModel = models?.[userType];
+      const userModel = models?.users;
 
       if (!userModel) return done(null, null);
 
@@ -38,19 +37,34 @@ export default (passport) => {
       },
       async (req, accessToken, refreshToken, profile, done) => {
         try {
-          const userType = req.query.state;
           const { id } = profile;
           let user = null;
 
-          const userModel = models?.[userType];
+          const userModel = models?.users;
 
           if (!userModel) return done(null, null);
 
-          user = await userModel.findOne({ where: { oAuthId: id } });
+          user = await userModel.findOne({
+            where: { oAuthId: id },
+            include: [
+              {
+                model: models.roles,
+                as: "role",
+                attributes: ["name"],
+              },
+            ],
+          });
 
           if (!user) {
             user = await userModel.findOne({
               where: { email: profile.emails[0].value },
+              include: [
+                {
+                  model: models.roles,
+                  as: "role",
+                  attributes: ["name"],
+                },
+              ],
             });
           }
 
@@ -66,30 +80,12 @@ export default (passport) => {
           }
 
           if (!user) {
-            const newUser = await models.user.create({ userType });
-            user = await userModel.create({
-              oAuthId: id,
-              oAuthProvider: "google",
-              id: newUser.id,
-              isEmailVerified: true,
-              email: profile.emails[0].value,
-              name: profile.displayName || "User",
-              firstName: profile.name.givenName || "User",
-              lastName: profile.name.familyName || "User",
-              ip: req.ip,
-              profileImage: profile?.photos[0]?.value || null,
-              phone: profile.phoneNumber || null,
-              gender: profile.gender || null,
-              isTermsAndConditionsAccepted: true,
-            });
+            // create user if required or throw an error
           }
 
-          return done(null, {
-            ...user?.dataValues,
-            user: { userType },
-          });
+          return done(null, user?.dataValues || null);
         } catch (err) {
-          console.error("Google OAuth Error:", err);
+          console.error("Google OAuth Error: ", err);
           return done(err, null);
         }
       },
