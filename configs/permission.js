@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { match } from "node-match-path";
 import { models, superAdminRoleId } from "./server.config.js";
 import commonProtectedRoutes from "./commonProtectedRoutes.js";
 
@@ -6,14 +6,7 @@ const { permissions } = models;
 
 const isUserAllowed = async (route, method, roleId) => {
   const sanitizedMethod = method.toUpperCase();
-  const baseSanitizedRoute = route?.split("?")[0]?.replace(/:\w+/g, "[^/]+");
-
-  const sanitizedRoutes = [
-    baseSanitizedRoute,
-    `${baseSanitizedRoute?.split("/")?.slice(0, -1)?.join("/")}`,
-  ];
-
-  console.log(1, sanitizedRoutes);
+  const currentSanitizedRoute = route?.split("?")[0];
 
   if (roleId === superAdminRoleId) return true;
 
@@ -50,24 +43,21 @@ const isUserAllowed = async (route, method, roleId) => {
     raw: true,
   });
 
-  console.log(2, currentRolePermittedRoutes);
+  const isPermittedRoute = !!currentRolePermittedRoutes.some((item) => {
+    const baseRoute = item?.route;
+    const expandedRoute = `${baseRoute}/:identifier`;
 
-  const permittedRoute = await permissions.findOne({
-    where: {
-      isActive: true,
-      roleId,
-      route: { [Op.in]: sanitizedRoutes },
-      ...(sanitizedMethod === "GET" ? { canView: true } : {}),
-      ...(sanitizedMethod === "POST" ? { canCreate: true } : {}),
-      ...(sanitizedMethod === "PUT" ? { canUpdate: true } : {}),
-      ...(sanitizedMethod === "DELETE" ? { canDelete: true } : {}),
-    },
-    raw: true,
+    const { matches: baseMatches } = match(baseRoute, currentSanitizedRoute);
+
+    const { matches: expandedMatches } = match(
+      expandedRoute,
+      currentSanitizedRoute,
+    );
+
+    return baseMatches || expandedMatches;
   });
 
-  if (permittedRoute?.id) return true;
-
-  return false;
+  return isPermittedRoute;
 };
 
 export { isUserAllowed };
