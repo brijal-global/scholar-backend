@@ -1,25 +1,21 @@
 import { Op } from "sequelize";
-import { models } from "./server.config.js";
+import { models, superAdminRoleId } from "./server.config.js";
 import commonProtectedRoutes from "./commonProtectedRoutes.js";
 
-const { roles, permissions } = models;
+const { permissions } = models;
 
 const isUserAllowed = async (route, method, roleId) => {
-  console.log(0, route, method, roleId);
-
   const sanitizedMethod = method.toUpperCase();
   const baseSanitizedRoute = route?.split("?")[0]?.replace(/:\w+/g, "[^/]+");
 
-  const sanitizedRoutes = [baseSanitizedRoute, `${baseSanitizedRoute}/:id`];
+  const sanitizedRoutes = [
+    baseSanitizedRoute,
+    `${baseSanitizedRoute?.split("/")?.slice(0, -1)?.join("/")}`,
+  ];
 
-  const role = await roles.findByPk(roleId, {
-    attributes: ["id", "name"],
-    raw: true,
-  });
+  console.log(1, sanitizedRoutes);
 
-  if (!role) return false;
-
-  if (role?.name === "superAdmin") return true;
+  if (roleId === superAdminRoleId) return true;
 
   // Check if the route and method match
   const isCommonProtectedRoute = commonProtectedRoutes.some((item) => {
@@ -41,39 +37,35 @@ const isUserAllowed = async (route, method, roleId) => {
 
   if (isCommonProtectedRoute) return true;
 
-  console.log(1, baseSanitizedRoute);
-  console.log(2, sanitizedRoutes);
-
-  const isRouteMatch = sanitizedRoutes.some((routeItem) => {
-    const routePattern = new RegExp(
-      `^${routeItem.replace(/:\w+/g, "[^/]+")}$`,
-      "i", // Case-insensitive
-    );
-    return routePattern.test(routeItem);
+  const currentRolePermittedRoutes = await permissions.findAll({
+    where: {
+      isActive: true,
+      roleId,
+      ...(sanitizedMethod === "GET" ? { canView: true } : {}),
+      ...(sanitizedMethod === "POST" ? { canCreate: true } : {}),
+      ...(sanitizedMethod === "PUT" ? { canUpdate: true } : {}),
+      ...(sanitizedMethod === "DELETE" ? { canDelete: true } : {}),
+    },
+    attributes: ["route"],
+    raw: true,
   });
 
-  console.log(3, isRouteMatch);
+  console.log(2, currentRolePermittedRoutes);
 
-  if (isRouteMatch) {
-    console.log(4, "Inside isRouteMatch");
+  const permittedRoute = await permissions.findOne({
+    where: {
+      isActive: true,
+      roleId,
+      route: { [Op.in]: sanitizedRoutes },
+      ...(sanitizedMethod === "GET" ? { canView: true } : {}),
+      ...(sanitizedMethod === "POST" ? { canCreate: true } : {}),
+      ...(sanitizedMethod === "PUT" ? { canUpdate: true } : {}),
+      ...(sanitizedMethod === "DELETE" ? { canDelete: true } : {}),
+    },
+    raw: true,
+  });
 
-    const permittedRoute = await permissions.findOne({
-      where: {
-        isActive: true,
-        roleId,
-        route: baseSanitizedRoute,
-        ...(sanitizedMethod === "GET" ? { canView: true } : {}),
-        ...(sanitizedMethod === "POST" ? { canCreate: true } : {}),
-        ...(sanitizedMethod === "PUT" ? { canUpdate: true } : {}),
-        ...(sanitizedMethod === "DELETE" ? { canDelete: true } : {}),
-      },
-      raw: true,
-    });
-
-    console.log(5, permittedRoute);
-
-    if (permittedRoute?.id) return true;
-  }
+  if (permittedRoute?.id) return true;
 
   return false;
 };
