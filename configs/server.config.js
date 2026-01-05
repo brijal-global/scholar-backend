@@ -49,3 +49,5 @@ export const oAuthConfigs = {
     callbackURL: "/api/auth/linkedin/callback",
   },
 };
+
+export const superAdminRoleId = "eff3af9d-5fbe-48be-bbf4-aac2eedf5967";

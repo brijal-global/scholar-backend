@@ -2,6 +2,7 @@ import { HttpException, NotFoundException } from "../../../exceptions/index.js";
 import { models } from "../../../../configs/server.config.js";
 import successResponse from "../../../utils/responses/successResponse.js";
 import { camelCaseToHyphen } from "../../../utils/helpers/stringFormatters.js";
+import { hashPassword } from "../../../lib/bcrypt.js";
 
 export default (router) => {
   const allModels = Object.keys(models);
@@ -36,11 +37,9 @@ export default (router) => {
         const payload = req.body;
         payload.updatedBy = req?.user?.id || null;
 
-        if (!req?.ip)
-          throw new HttpException(400, "User's IP not found!", camelCaseModel);
-        payload.ip = req?.ip;
-
-        if (req?.user?.id) payload.updatedBy = req?.user?.id;
+        if (payload?.password) {
+          payload.password = await hashPassword(payload.password);
+        }
 
         const data = await module?.update(payload, {
           where: { id },
