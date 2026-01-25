@@ -97,7 +97,7 @@ app.get("/health", (req, res, next) => {
   try {
     res.send({
       status: 200,
-      message: `Hi there, ${server.appName} is up and healthy!`,
+      message: `Hi, ${server.appName} is up and healthy!!!`,
       data: {
         ip: req.ip || "Not Found!",
         ips: req.ips || "Not Found!",
