@@ -7,7 +7,6 @@ services:
         NODE_ENV: ${NODE_ENV}
         MAX_MEMORY: ${MAX_MEMORY}
     image: ${APP_NAME}-${NODE_ENV}:latest
-    container_name: ${APP_NAME}-${NODE_ENV}
     restart: unless-stopped
     ports:
       - ${APP_PORT}:${APP_PORT}
@@ -16,11 +15,6 @@ services:
     #   - .:/app:delegated
     #   # Prevent overwriting node_modules in container
     #   - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "${BACKEND_MAIN_URL}/health"]
       interval: 10s
@@ -34,14 +28,9 @@ services:
         reservations:
           memory: ${MIN_MEMORY}M
     networks:
-      - ${APP_NAME}-network
+      - scholar-network
 
 networks:
-  scholar-backend-network:
+  scholar-network:
+    name: scholar-network
     driver: bridge
-
-volumes:
-  postgres-data:
-    driver: local
-  redis-data:
-    driver: local

@@ -2,7 +2,7 @@ name: Scholar Backend Deployment
 
 on:
   push:
-    branches: [development, production]
+    branches: [production]
 
 env:
   PROJECT_NAME: scholar-backend
@@ -17,7 +17,8 @@ env:
   NODE_ENV: ${{ github.ref_name }}
   WORKDIR: /app
   SSH_KEY_PATH: /tmp/${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.run_number }}/ssh_key.pem
-  BUILD_NAME: ${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.run_number }}
+  BUILD_NAME_SHORT: ${{ github.event.repository.name }}_${{ github.ref_name }}
+  BUILD_NAME_LONG: ${{ github.event.repository.name }}_${{ github.ref_name }}_${{ github.run_number }}
 
 jobs:
   deploy:
@@ -34,9 +35,9 @@ jobs:
 
       - name: Copy code to action's temporary directory
         run: |
-          mkdir -p /tmp/${{ env.BUILD_NAME }}
-          cp -r . /tmp/${{ env.BUILD_NAME }}/
-          cd /tmp/${{ env.BUILD_NAME }}
+          mkdir -p /tmp/${{ env.BUILD_NAME_LONG }}
+          cp -r . /tmp/${{ env.BUILD_NAME_LONG }}/
+          cd /tmp/${{ env.BUILD_NAME_LONG }}
           rm -rf .git .github .vscode node_modules
           echo "${{ env.APP_ENV }}" > .env.${{ env.NODE_ENV }}
           echo "GITHUB_RUN_NUMBER=${{ env.RUN_NUMBER }}" >> .env.${{ env.NODE_ENV }}
@@ -44,8 +45,8 @@ jobs:
 
       - name: Zip the source-code
         run: |
-          cd /tmp/${{ env.BUILD_NAME }}
-          zip -r ${{ env.BUILD_NAME }}.zip .
+          cd /tmp/${{ env.BUILD_NAME_LONG }}
+          zip -r ${{ env.BUILD_NAME_LONG }}.zip .
 
       - name: Save the SSH_KEY to the action's temporary directory
         run: |
@@ -60,36 +61,44 @@ jobs:
       - name: Create required directories on VM
         run: |
           ssh -i ${{ env.SSH_KEY_PATH }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'EOF'
-            mkdir -p ~/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME }}
+            set -e  # Exit immediately on error
+            set -u  # Treat unset variables as error
+            mkdir -p ~/data/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME_LONG }}
           EOF
 
       - name: Send the zipped source-code to the VM
         run: |
-          cd /tmp/${{ env.BUILD_NAME }}
-          scp -i ${{ env.SSH_KEY_PATH }} -r ${{ env.BUILD_NAME }}.zip ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:~/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME }}.zip
+          cd /tmp/${{ env.BUILD_NAME_LONG }}
+          scp -i ${{ env.SSH_KEY_PATH }} -r ${{ env.BUILD_NAME_LONG }}.zip ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:~/data/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME_LONG }}.zip
 
       - name: Unzip the source-code on the VM and remove the zip file
         run: |
           ssh -i ${{ env.SSH_KEY_PATH }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'EOF'
+            set -e  # Exit immediately on error
+            set -u  # Treat unset variables as error
+
             # Install unzip if not present
             if ! command -v unzip &> /dev/null; then
               sudo apt-get update && sudo apt-get install -y unzip
             fi
 
-            cd ~/projects/${{ env.PROJECT_NAME }}
+            cd ~/data/projects/${{ env.PROJECT_NAME }}
 
             # Remove existing build directory and extract fresh
-            rm -rf ${{ env.BUILD_NAME }}
-            mkdir -p ${{ env.BUILD_NAME }}
-            unzip -o ${{ env.BUILD_NAME }}.zip -d ${{ env.BUILD_NAME }}
-            rm -f ${{ env.BUILD_NAME }}.zip
+            rm -rf ${{ env.BUILD_NAME_LONG }}
+            mkdir -p ${{ env.BUILD_NAME_LONG }}
+            unzip -o ${{ env.BUILD_NAME_LONG }}.zip -d ${{ env.BUILD_NAME_LONG }}
+            rm -f ${{ env.BUILD_NAME_LONG }}.zip
           EOF
 
       - name: Deploy with Docker Compose
         run: |
           ssh -i ${{ env.SSH_KEY_PATH }} ${{ env.SSH_USER }}@${{ env.SSH_HOST }} << 'EOF'
+            set -e  # Exit immediately on error
+            set -u  # Treat unset variables as error
+            
             # Go to the project directory
-            cd ~/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME }}
+            cd ~/data/projects/${{ env.PROJECT_NAME }}/${{ env.BUILD_NAME_LONG }}
 
             # Verify the env file exists
             if [ ! -f ".env.${{ env.NODE_ENV }}" ]; then
@@ -98,15 +107,15 @@ jobs:
               exit 1
             fi
 
-            # Stop the existing app containers
-            sudo docker rm -f ${{ env.PROJECT_NAME }}-${{ env.NODE_ENV }}
-            sudo docker rm -f postgres-scholar-dev
-            sudo docker rm -f redis-scholar-dev
+            # Build the new image first (without starting container)
+            echo "Building Docker image... ${{ env.BUILD_NAME_LONG }}"
+            sudo docker compose --env-file=.env.${{ env.NODE_ENV }} -p ${{ env.BUILD_NAME_LONG }} build --no-cache
 
-            # Remove the unused and dangling images
-            sudo docker image prune -a -f
+            # If build succeeded, stop and remove old container (matching BUILD_NAME_SHORT pattern)
+            echo "Stopping old container matching pattern: ${{ env.BUILD_NAME_SHORT }}"
+            sudo docker ps -a --filter "name=${{ env.BUILD_NAME_SHORT }}*" --format "{{.Names}}" | xargs -r sudo docker rm -f
 
-            # Deploy with Docker Compose
-            echo "Deploying with Docker Compose... ${{ env.BUILD_NAME }}"
-            sudo docker compose --env-file=.env.${{ env.NODE_ENV }} -p ${{ env.BUILD_NAME }} up -d --build --force-recreate
+            # Start the new container
+            echo "Starting container... ${{ env.BUILD_NAME_LONG }}"
+            sudo docker compose --env-file=.env.${{ env.NODE_ENV }} -p ${{ env.BUILD_NAME_LONG }} up -d
           EOF
