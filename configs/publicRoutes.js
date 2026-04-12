@@ -43,4 +43,12 @@ export default [
     methods: ["POST"],
     route: "/api/inquiries",
   },
+  {
+    methods: ["GET"],
+    route: "/api/erd",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/erd/json",
+  },
 ];
