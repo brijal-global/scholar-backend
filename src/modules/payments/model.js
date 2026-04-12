@@ -30,5 +30,9 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Payments.associate = (models) => {
+    Payments.belongsTo(models.subscriptions, { foreignKey: "subscriptionId", as: "subscription" });
+  };
+
   return Payments;
 };

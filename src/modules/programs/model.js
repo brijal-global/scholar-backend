@@ -42,5 +42,9 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Programs.associate = (models) => {
+    Programs.belongsTo(models.colleges, { foreignKey: "collegeId", as: "college" });
+  };
+
   return Programs;
 };

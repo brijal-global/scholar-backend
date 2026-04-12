@@ -31,5 +31,10 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  SubscribedModules.associate = (models) => {
+    SubscribedModules.belongsTo(models.subscriptions, { foreignKey: "subscriptionId", as: "subscription" });
+    SubscribedModules.belongsTo(models.planModules, { foreignKey: "planModuleId", as: "planModule" });
+  };
+
   return SubscribedModules;
 };

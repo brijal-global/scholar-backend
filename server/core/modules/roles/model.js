@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
         msg: "Role already exists!",
       },
     },
+    slug: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,

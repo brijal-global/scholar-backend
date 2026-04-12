@@ -45,5 +45,10 @@ export default (sequelize, DataTypes) => {
     },
   );
 
+  CollegeCustomRolePermissions.associate = (models) => {
+    CollegeCustomRolePermissions.belongsTo(models.collegeCustomRoleGroups, { foreignKey: "collegeCustomRoleGroupId", as: "roleGroup" });
+    CollegeCustomRolePermissions.belongsTo(models.subscribedModules, { foreignKey: "subscribedModuleId", as: "subscribedModule" });
+  };
+
   return CollegeCustomRolePermissions;
 };

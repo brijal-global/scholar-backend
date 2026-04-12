@@ -1,7 +1,9 @@
-import { AuthException, HttpException } from "../../../exceptions/index.js";
+import { AuthException } from "../../../exceptions/index.js";
 import successResponse from "../../../utils/responses/successResponse.js";
 import { models } from "../../../../configs/server.config.js";
 import { sanitizePayload } from "../../../utils/filters/payloadFilter.js";
+
+const { users } = models;
 
 const currentUser = async (req, res, next) => {
   try {
@@ -36,12 +38,7 @@ const updateMyProfile = async (req, res, next) => {
       "oAuthProvider",
     ]);
 
-    const userType = userData?.user?.userType;
-    const model = models[userType];
-
-    if (!model) throw new HttpException(404, "User model not found!", "auth");
-
-    await model.update(payload, {
+    await users.update(payload, {
       where: { id: userData.id },
     });
 

@@ -2,11 +2,11 @@ import jwt from "jsonwebtoken";
 import { jwtConfig } from "../../configs/env.config.js";
 import { AuthException } from "../exceptions/index.js";
 
-const signAccessToken = (id, role) => {
+const signAccessToken = (id, roleId) => {
   return new Promise((resolve, reject) => {
     const payload = {
       sub: id,
-      role: role,
+      roleId: roleId,
       iat: Date.now(),
     };
 
@@ -28,11 +28,11 @@ const signAccessToken = (id, role) => {
   });
 };
 
-const signRefreshToken = (id, role) => {
+const signRefreshToken = (id, roleId) => {
   return new Promise((resolve, reject) => {
     const payload = {
       sub: id,
-      role: role,
+      roleId: roleId,
       iat: Date.now(),
     };
 
@@ -54,11 +54,11 @@ const signRefreshToken = (id, role) => {
   });
 };
 
-const signGeneralToken = (id, role, type) => {
+const signGeneralToken = (id, roleId, type) => {
   return new Promise((resolve, reject) => {
     const payload = {
       sub: id,
-      role: role,
+      roleId: roleId,
       type: type,
       iat: Date.now(),
     };

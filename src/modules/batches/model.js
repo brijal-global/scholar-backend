@@ -30,5 +30,9 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Batches.associate = (models) => {
+    Batches.belongsTo(models.programs, { foreignKey: "programId", as: "program" });
+  };
+
   return Batches;
 };

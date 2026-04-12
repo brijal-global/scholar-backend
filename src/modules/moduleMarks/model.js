@@ -34,5 +34,10 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  ModuleMarks.associate = (models) => {
+    ModuleMarks.belongsTo(models.examModules, { foreignKey: "examModuleId", as: "examModule" });
+    ModuleMarks.belongsTo(models.studentDetails, { foreignKey: "studentId", as: "student" });
+  };
+
   return ModuleMarks;
 };

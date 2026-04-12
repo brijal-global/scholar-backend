@@ -46,5 +46,12 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  OrganizationEmployees.associate = (models) => {
+    OrganizationEmployees.belongsTo(models.users, { foreignKey: "userId", as: "user" });
+    OrganizationEmployees.belongsTo(models.colleges, { foreignKey: "collegeId", as: "college" });
+    OrganizationEmployees.belongsTo(models.collegeCustomRoleGroups, { foreignKey: "collegeCustomRoleGroupId", as: "roleGroup" });
+    OrganizationEmployees.belongsTo(models.modules, { foreignKey: "associatedModuleId", as: "associatedModule" });
+  };
+
   return OrganizationEmployees;
 };

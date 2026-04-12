@@ -22,5 +22,9 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  CollegeCustomRoleGroups.associate = (models) => {
+    CollegeCustomRoleGroups.belongsTo(models.colleges, { foreignKey: "collegeId", as: "college" });
+  };
+
   return CollegeCustomRoleGroups;
 };

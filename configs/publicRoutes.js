@@ -1,15 +1,31 @@
 export default [
   {
     methods: ["GET"],
-    route: "/health",
-  },
-  {
-    methods: ["GET"],
     route: "/favicon.ico",
   },
   {
     methods: ["GET"],
+    route: "/health",
+  },
+  {
+    methods: ["GET"],
     route: "/api/auth/reset-superadmin",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/auth/oauth/configs",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/auth/google",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/auth/google/callback",
+  },
+  {
+    methods: ["POST"],
+    route: "/api/auth/signup/college-owner",
   },
   {
     methods: ["POST"],
@@ -24,15 +40,7 @@ export default [
     route: "/api/auth/signout",
   },
   {
-    methods: ["GET"],
-    route: "/api/auth/oauth/configs",
-  },
-  {
-    methods: ["GET"],
-    route: "/api/auth/google",
-  },
-  {
-    methods: ["GET"],
-    route: "/api/auth/google/callback",
+    methods: ["POST"],
+    route: "/api/inquiries",
   },
 ];

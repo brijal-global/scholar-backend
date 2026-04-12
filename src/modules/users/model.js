@@ -84,6 +84,26 @@ export default (sequelize, DataTypes) => {
       foreignKey: "roleId",
       as: "role",
     });
+    Users.hasMany(models.accessTokens, {
+      foreignKey: "userId",
+      as: "accessTokens",
+    });
+    Users.hasMany(models.refreshTokens, {
+      foreignKey: "userId",
+      as: "refreshTokens",
+    });
+    Users.hasMany(models.organizationEmployees, {
+      foreignKey: "userId",
+      as: "organizationEmployees",
+    });
+    Users.hasMany(models.studentDetails, {
+      foreignKey: "userId",
+      as: "studentDetails",
+    });
+    Users.hasMany(models.attendances, {
+      foreignKey: "userId",
+      as: "attendances",
+    });
   };
 
   return Users;

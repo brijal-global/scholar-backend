@@ -18,5 +18,9 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Attendances.associate = (models) => {
+    Attendances.belongsTo(models.users, { foreignKey: "userId", as: "user" });
+  };
+
   return Attendances;
 };

@@ -1,6 +1,7 @@
 import { match } from "node-match-path";
-import { models, superAdminRoleId } from "./server.config.js";
+import { models, ids } from "./server.config.js";
 import commonProtectedRoutes from "./commonProtectedRoutes.js";
+import generalCollegeRoutes from "./generalCollegeRoutes.js";
 
 const { permissions } = models;
 
@@ -8,23 +9,34 @@ const isUserAllowed = async (route, method, roleId) => {
   const sanitizedMethod = method.toUpperCase();
   const currentSanitizedRoute = route?.split("?")[0];
 
+  const superAdminRoleId = ids.superAdminRoleId;
+  const organizationEmployeeRoleId = ids.organizationEmployeeRoleId;
+
   if (roleId === superAdminRoleId) return true;
 
-  // Check if the route and method match
+  if (roleId === organizationEmployeeRoleId) {
+    const isCollegeRoute = generalCollegeRoutes.some((item) => {
+      const { matches } = match(item.route, currentSanitizedRoute);
+      const isMethodMatch = item.methods.includes(sanitizedMethod);
+      return matches && isMethodMatch;
+    });
+
+    if (isCollegeRoute) return true;
+  }
+
   const isCommonProtectedRoute = commonProtectedRoutes.some((item) => {
     const normalizedMethods = item.methods.map((method) =>
       method.toUpperCase(),
     );
 
-    // Convert dynamic route patterns like `/api/testimonials/:id` into a regex
     const routePattern = new RegExp(
       `^${item.route.replace(/:\w+/g, "[^/]+")}$`,
-      "i", // Case-insensitive
+      "i",
     );
 
     return (
-      routePattern.test(route) && // Check if the route matches the pattern
-      normalizedMethods.includes(sanitizedMethod) // Check if the method is allowed
+      routePattern.test(route) &&
+      normalizedMethods.includes(sanitizedMethod)
     );
   });
 
