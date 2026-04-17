@@ -3,6 +3,7 @@ name: Scholar Backend Deployment
 on:
   push:
     branches: [production]
+  workflow_dispatch:  # For Run Workflow Button
 
 env:
   PROJECT_NAME: scholar-backend
