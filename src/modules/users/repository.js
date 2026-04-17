@@ -34,7 +34,16 @@ export const getCustomUserForMeRoute = async (userId, roleId) => {
             {
               model: colleges,
               as: "college",
-              attributes: ["id", "name", "collegeType", "logo", "coverImage"],
+              attributes: [
+                "id",
+                "name",
+                "collegeType",
+                "logo",
+                "coverImage",
+                "country",
+                "city",
+                "streetAddress",
+              ],
               required: false,
             },
           ],

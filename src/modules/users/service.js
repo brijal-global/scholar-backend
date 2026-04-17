@@ -1,6 +1,7 @@
 import { createUser } from "./repository.js";
 import { ids, models } from "../../../configs/server.config.js";
 import { hashPassword } from "../../../server/lib/bcrypt.js";
+import { seedPlanModules } from "../permissions/route.js";
 
 const { roles, colleges, organizationEmployees, collegeCustomRoleGroups } =
   models;
@@ -58,6 +59,7 @@ export const createCollegeOwner = async (payload) => {
     collegeId: college.id,
     name: "Admin",
     description: "Default administrator role group",
+    isAdmin: true,
     ip: payload.ip,
     createdBy: user.id,
     updatedBy: user.id,
@@ -73,6 +75,31 @@ export const createCollegeOwner = async (payload) => {
     createdBy: user.id,
     updatedBy: user.id,
   });
+
+  // Ensure system planModules exist, then grant Admin full permissions
+  try {
+    await seedPlanModules();
+    const allPlanModules = await models.planModules.findAll({
+      where: { isSystemModule: true, isActive: true },
+    });
+    await Promise.all(
+      allPlanModules.map((pm) =>
+        models.collegeCustomRolePermissions.create({
+          collegeCustomRoleGroupId: adminRoleGroup.id,
+          planModuleId: pm.id,
+          canView: true,
+          canCreate: true,
+          canEdit: true,
+          canDelete: true,
+          ip: payload.ip,
+          createdBy: user.id,
+          updatedBy: user.id,
+        }),
+      ),
+    );
+  } catch (e) {
+    console.warn("Warning: could not seed admin permissions", e.message);
+  }
 
   await user.reload({
     include: [

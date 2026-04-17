@@ -13,9 +13,24 @@ export default (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    isSystemModule: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    /* ── Legacy pricing fields (kept for data compatibility) ── */
     monthlyPrice: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
+      allowNull: true,
     },
     offerName: {
       type: DataTypes.STRING(255),
@@ -24,11 +39,6 @@ export default (sequelize, DataTypes) => {
     offerMonthlyPrice: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
     },
   });
 

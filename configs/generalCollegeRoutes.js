@@ -108,6 +108,26 @@ export default [
     route: "/api/organization-employees/:id",
   },
   {
+    methods: ["GET"],
+    route: "/api/organization-employees-with-info",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/plan-modules",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/my-permissions",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/college-custom-role-permissions",
+  },
+  {
+    methods: ["POST"],
+    route: "/api/college-custom-role-permissions/batch",
+  },
+  {
     methods: ["GET", "POST"],
     route: "/api/college-custom-role-groups",
   },

@@ -124,10 +124,21 @@ export default (router) => {
         order: [["createdAt", "ASC"]],
       });
 
-      if (!examModules.length || !studentRecords.length) {
+      const examModulesSummary = examModules.map((em) => ({
+        id: em.id,
+        examId: em.examId,
+        moduleId: em.moduleId,
+        moduleName: em.module?.name || em.moduleId,
+        moduleCode: em.module?.code || "",
+        examType: em.examType,
+        totalMarks: em.totalMarks,
+      }));
+
+      // If no students, return real examModules with empty students array
+      if (!studentRecords.length) {
         return successResponse(
           res,
-          { examModules: [], students: [] },
+          { examModules: examModulesSummary, students: [] },
           "Results fetched",
           "results-by-group",
         );
@@ -165,16 +176,6 @@ export default (router) => {
         lastName: sd.user?.lastName || "",
         email: sd.user?.email || "",
         marks: marksMap[sd.id] || {},
-      }));
-
-      const examModulesSummary = examModules.map((em) => ({
-        id: em.id,
-        examId: em.examId,
-        moduleId: em.moduleId,
-        moduleName: em.module?.name || em.moduleId,
-        moduleCode: em.module?.code || "",
-        examType: em.examType,
-        totalMarks: em.totalMarks,
       }));
 
       return successResponse(
