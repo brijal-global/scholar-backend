@@ -5,7 +5,6 @@ const {
   roles,
   organizationEmployees,
   colleges,
-  subscriptions,
   studentDetails,
   groups,
   batches,
@@ -19,7 +18,11 @@ export const getCustomUserForMeRoute = async (userId, roleId) => {
     user = await users.findOne({
       where: { id: userId },
       include: [
-        { model: roles, as: "role", attributes: ["id", "name", "slug"] },
+        {
+          model: roles,
+          as: "role",
+          attributes: ["id", "name", "slug"],
+        },
         {
           model: organizationEmployees,
           as: "organizationEmployees",
@@ -67,7 +70,11 @@ export const getCustomUserForMeRoute = async (userId, roleId) => {
     user = await users.findOne({
       where: { id: userId },
       include: [
-        { model: roles, as: "role", attributes: ["id", "name", "slug"] },
+        {
+          model: roles,
+          as: "role",
+          attributes: ["id", "name", "slug"],
+        },
         {
           model: studentDetails,
           as: "studentDetails",
@@ -112,7 +119,11 @@ export const getCustomUserForMeRoute = async (userId, roleId) => {
     user = await users.findOne({
       where: { id: userId },
       include: [
-        { model: roles, as: "role", attributes: ["id", "name", "slug"] },
+        {
+          model: roles,
+          as: "role",
+          attributes: ["id", "name", "slug"],
+        },
       ],
     });
     user = user.toJSON();

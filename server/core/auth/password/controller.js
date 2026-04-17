@@ -3,6 +3,8 @@ import successResponse from "../../../utils/responses/successResponse.js";
 import { models } from "../../../../configs/server.config.js";
 import { hashPassword, verifyHashedPassword } from "../../../lib/bcrypt.js";
 
+const { users } = models;
+
 const changeMyPassword = async (req, res, next) => {
   try {
     const userData = req?.user;
@@ -34,9 +36,15 @@ const changeMyPassword = async (req, res, next) => {
       );
     }
 
+    const user = await users.findOne({
+      where: { id: userData.id },
+      attributes: ["id", "password"],
+      raw: true,
+    });
+
     const isPasswordValid = await verifyHashedPassword(
       currentPassword,
-      userData?.password,
+      user?.password,
     );
 
     if (!isPasswordValid) {
@@ -44,7 +52,7 @@ const changeMyPassword = async (req, res, next) => {
     }
 
     const hashedPassword = await hashPassword(newPassword);
-    await models.users.update(
+    await users.update(
       { password: hashedPassword },
       {
         where: { id: userData.id },

@@ -33,7 +33,7 @@ export const cookieConfig = {
   secure: true,
   httpOnly: true,
   path: "/",
-  ...(server.env === "production" ? { sameSite: `lax` } : { sameSite: `none` }),
+  ...(server.env === "production" ? { sameSite: `none` } : { sameSite: `none` }),
   ...(server.env === "production" && { domain: `.${server.mainDomain}` }),
 };
 
