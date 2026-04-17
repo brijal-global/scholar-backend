@@ -5,30 +5,44 @@ import successResponse from "../../../server/utils/responses/successResponse.js"
    System planModules that should exist in the DB.
    Used in the seeder and in my-permissions for Admins.
 ──────────────────────────────────────────────────────────── */
-export const SYSTEM_MODULES = [
-  { code: "programs", name: "Programs" },
-  { code: "batches", name: "Batches" },
-  { code: "groups", name: "Groups" },
-  { code: "courses", name: "Modules (Courses)" },
-  { code: "students", name: "Students" },
-  { code: "attendance", name: "Attendance" },
-  { code: "exams", name: "Exams" },
-  { code: "results", name: "Results" },
-  { code: "remarks", name: "Remarks" },
-  { code: "employees", name: "Employees" },
-  { code: "roles", name: "Role Groups" },
-  { code: "college-profile", name: "College Profile" },
+const SYSTEM_MODULES = [
+  { code: "programs", name: "Programs", desc: "Academic programs management" },
+  { code: "batches", name: "Batches", desc: "Batch / intake management" },
+  { code: "groups", name: "Groups", desc: "Student groups management" },
+  {
+    code: "courses",
+    name: "Modules (Subjects)",
+    desc: "Course & module catalog",
+  },
+  { code: "students", name: "Students", desc: "Student records" },
+  { code: "attendance", name: "Attendance", desc: "Attendance tracking" },
+  { code: "exams", name: "Exams", desc: "Exam management & marks entry" },
+  { code: "results", name: "Results", desc: "Exam result sheets" },
+  { code: "remarks", name: "Remarks", desc: "Student remarks / notes" },
+  { code: "employees", name: "Employees", desc: "Staff & employee records" },
+  {
+    code: "roles",
+    name: "Role Groups",
+    desc: "Custom role & permission groups",
+  },
+  {
+    code: "college-profile",
+    name: "College Profile",
+    desc: "College settings",
+  },
 ];
 
 /**
  * Ensure all system plan modules exist in DB (idempotent).
  */
-export async function seedPlanModules() {
+export async function seedPlanModules(ip) {
   for (const mod of SYSTEM_MODULES) {
     await models.planModules.findOrCreate({
       where: { code: mod.code },
       defaults: {
         name: mod.name,
+        description: mod.desc,
+        ip: ip,
         isSystemModule: true,
         isActive: true,
       },
@@ -37,6 +51,38 @@ export async function seedPlanModules() {
 }
 
 export default (router) => {
+  /**
+   * POST /api/load-default-modules
+   * Scholar-admin endpoint: idempotently seeds all system planModules so that
+   * college admins can configure per-role permissions in the /org portal.
+   * Accessible only to superAdmin (unrestricted by the permission middleware).
+   */
+  router.get("/load-default-modules", async (req, res, next) => {
+    try {
+      await seedPlanModules(req.ip);
+      const modules = await models.planModules.findAll({
+        where: { isSystemModule: true, isActive: true },
+        attributes: [
+          "id",
+          "code",
+          "name",
+          "description",
+          "isSystemModule",
+          "isActive",
+        ],
+        order: [["name", "ASC"]],
+      });
+      return successResponse(
+        res,
+        modules,
+        `${modules.length} default module(s) loaded successfully`,
+        "load-default-modules",
+      );
+    } catch (err) {
+      next(err);
+    }
+  });
+
   /**
    * GET /api/plan-modules
    * Returns all system planModules.
@@ -217,12 +263,10 @@ export default (router) => {
       try {
         const { roleGroupId, permissions } = req.body;
         if (!roleGroupId || !Array.isArray(permissions)) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "roleGroupId and permissions[] are required",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "roleGroupId and permissions[] are required",
+          });
         }
 
         for (const perm of permissions) {

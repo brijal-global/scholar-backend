@@ -78,7 +78,7 @@ export const createCollegeOwner = async (payload) => {
 
   // Ensure system planModules exist, then grant Admin full permissions
   try {
-    await seedPlanModules();
+    await seedPlanModules(payload.ip);
     const allPlanModules = await models.planModules.findAll({
       where: { isSystemModule: true, isActive: true },
     });
