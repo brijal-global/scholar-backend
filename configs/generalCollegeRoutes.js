@@ -48,6 +48,10 @@ export default [
     route: "/api/attendances/:id",
   },
   {
+    methods: ["GET"],
+    route: "/api/attendance-by-group",
+  },
+  {
     methods: ["GET", "POST"],
     route: "/api/exams",
   },
@@ -78,6 +82,14 @@ export default [
   {
     methods: ["GET", "PUT", "DELETE"],
     route: "/api/student-details/:id",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/students-with-info",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/results-by-group",
   },
   {
     methods: ["GET", "POST"],
