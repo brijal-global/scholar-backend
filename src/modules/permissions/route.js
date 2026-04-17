@@ -129,9 +129,12 @@ export default (router) => {
 
       if (!employee) {
         // If not an employee (e.g., college owner), check if they have a college
-        const college = await models.colleges.findOne({
-          where: { ownerId: user.id },
-        });
+        // const college = await models.colleges.findOne({
+        //   where: { ownerId: user.id },
+        // });
+
+        const college = null;
+
         if (college) {
           // Owner has full admin access — return all module permissions as true
           const allModules = await models.planModules.findAll({
