@@ -14,9 +14,17 @@ export default (sequelize, DataTypes) => {
           key: "id",
         },
       },
+      planModuleId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: "planModules",
+          key: "id",
+        },
+      },
       subscribedModuleId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "subscribedModules",
           key: "id",
@@ -44,6 +52,23 @@ export default (sequelize, DataTypes) => {
       },
     },
   );
+
+  CollegeCustomRolePermissions.associate = (models) => {
+    CollegeCustomRolePermissions.belongsTo(models.collegeCustomRoleGroups, {
+      foreignKey: "collegeCustomRoleGroupId",
+      as: "roleGroup",
+    });
+    CollegeCustomRolePermissions.belongsTo(models.planModules, {
+      foreignKey: "planModuleId",
+      as: "planModule",
+    });
+    if (models.subscribedModules) {
+      CollegeCustomRolePermissions.belongsTo(models.subscribedModules, {
+        foreignKey: "subscribedModuleId",
+        as: "subscribedModule",
+      });
+    }
+  };
 
   return CollegeCustomRolePermissions;
 };

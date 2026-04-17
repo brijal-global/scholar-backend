@@ -9,6 +9,10 @@ export default [
   },
   {
     methods: ["PUT"],
-    route: "/api/auth/change-password",
+    route: "/api/auth/change-my-password",
+  },
+  {
+    methods: ["PUT"],
+    route: "/api/auth/update-my-profile",
   },
 ];

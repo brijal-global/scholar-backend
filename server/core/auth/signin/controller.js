@@ -6,13 +6,21 @@ import successResponse from "../../../utils/responses/successResponse.js";
 import { frontend, jwtConfig } from "../../../../configs/env.config.js";
 import { signAccessToken, signRefreshToken } from "../../../lib/jwt.js";
 import { verifyHashedPassword } from "../../../lib/bcrypt.js";
-import { cookieConfig, models } from "../../../../configs/server.config.js";
 import {
-  convertJwtTimeToSeconds,
-  getUtcTimestamp,
-} from "../../../utils/helpers/timeFormatters.js";
+  cookieConfig,
+  models,
+  ids,
+} from "../../../../configs/server.config.js";
+import { convertJwtTimeToSeconds } from "../../../utils/helpers/timeFormatters.js";
 
-const { users, roles, accessTokens, refreshTokens } = models;
+const {
+  users,
+  roles,
+  accessTokens,
+  refreshTokens,
+  organizationEmployees,
+  colleges,
+} = models;
 
 const signInUser = async (req, res, next) => {
   try {
@@ -24,7 +32,7 @@ const signInUser = async (req, res, next) => {
         {
           model: roles,
           as: "role",
-          attributes: ["name"],
+          attributes: ["id", "name", "slug"],
           required: true,
         },
       ],
@@ -38,7 +46,7 @@ const signInUser = async (req, res, next) => {
     if (!hashedPassword && existingUser?.oAuthProvider) {
       const oauthProvider = existingUser?.oAuthProvider;
       throw new ForbiddenException(
-        `Please sign in with ${oauthProvider} as you have signed up with ${oauthProvider}`,
+        `This account uses ${oauthProvider} to sign in.`,
         "auth.signin",
       );
     }
@@ -47,6 +55,41 @@ const signInUser = async (req, res, next) => {
 
     if (!isMatch)
       throw new AuthException("Invalid credentials!", "auth.signin");
+
+    if (existingUser?.isActive !== true) {
+      throw new ForbiddenException(
+        "This account is not active. Please contact support or your administrator.",
+        "auth.signin",
+      );
+    }
+
+    if (existingUser?.roleId === ids.organizationEmployeeRoleId) {
+      const employeeRecord = await organizationEmployees.findOne({
+        where: { userId: existingUser.id },
+        include: [
+          {
+            model: colleges,
+            as: "college",
+            attributes: ["id", "name", "isActive"],
+            required: true,
+          },
+        ],
+      });
+
+      if (!employeeRecord) {
+        throw new ForbiddenException(
+          "Your account is not linked to any college. Please contact your administrator.",
+          "auth.signin",
+        );
+      }
+
+      if (employeeRecord.college?.isActive !== true) {
+        throw new ForbiddenException(
+          "The college associated with your account is currently inactive. Please contact support.",
+          "auth.signin",
+        );
+      }
+    }
 
     processAuth(req, res, next, existingUser, "response");
   } catch (error) {
@@ -62,13 +105,13 @@ export const processAuth = async (
   responseType = "response",
 ) => {
   try {
-    const role = user?.role?.name;
+    const roleId = user?.roleId;
 
-    if (!role) throw new ForbiddenException("Role not found!", "auth.signin");
+    if (!roleId) throw new ForbiddenException("Role not found!", "auth.signin");
 
-    const newAccessToken = await signAccessToken(user.id, role);
+    const newAccessToken = await signAccessToken(user.id, roleId);
 
-    const newRefreshToken = await signRefreshToken(user.id, role);
+    const newRefreshToken = await signRefreshToken(user.id, roleId);
 
     let accessTokenPayload = {
       userId: user.id,
@@ -82,32 +125,38 @@ export const processAuth = async (
       ip: req?.ip,
     };
 
+    const accessTokenExpiresInSeconds = convertJwtTimeToSeconds(
+      jwtConfig.accessTokenExpiresIn,
+    );
+    const refreshTokenExpiresInSeconds = convertJwtTimeToSeconds(
+      jwtConfig.refreshTokenExpiresIn,
+    );
+
     await accessTokens.create(accessTokenPayload);
     await refreshTokens.create(refreshTokenPayload);
-
-    // Update last login time
-    users
-      .update({ lastLogin: getUtcTimestamp() }, { where: { id: user.id } })
-      .catch((err) => console.error("Error updating last login: ", err));
 
     res.cookie("accessToken", newAccessToken, {
       ...cookieConfig,
       priority: "high",
-      maxAge: convertJwtTimeToSeconds(jwtConfig.accessTokenExpiresIn) * 1000,
+      maxAge: accessTokenExpiresInSeconds * 1000,
     });
 
     res.cookie("refreshToken", newRefreshToken, {
       ...cookieConfig,
       priority: "high",
-      maxAge: convertJwtTimeToSeconds(jwtConfig.refreshTokenExpiresIn) * 1000,
+      maxAge: refreshTokenExpiresInSeconds * 1000,
     });
 
     if (responseType === "redirect") {
-      // Redirect to frontend
-      const redirectUrl = `${frontend.mainUrl}/dashboard`;
+      const redirectUrl = `${frontend.mainUrl}/auth`;
       return res.redirect(redirectUrl);
     } else {
-      return successResponse(res, "Logged in successfully!", "loggedIn", role);
+      return successResponse(
+        res,
+        "Logged in successfully!",
+        "loggedIn",
+        roleId,
+      );
     }
   } catch (error) {
     next(error);

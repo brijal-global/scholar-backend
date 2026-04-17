@@ -1,13 +1,14 @@
 import successResponse from "../../../utils/responses/successResponse.js";
 import { frontend, superAdmin } from "../../../../configs/env.config.js";
-import { models } from "../../../../configs/server.config.js";
+import { models, ids } from "../../../../configs/server.config.js";
 import { hashPassword } from "../../../lib/bcrypt.js";
-import { superAdminRoleId } from "../../../../configs/server.config.js";
 
 const { users, roles, accessTokens, refreshTokens } = models;
 
 const resetSuperAdmin = async (req, res, next) => {
   try {
+    const superAdminRoleId = ids.superAdminRoleId;
+
     const superAdminRole = await roles.findOne({
       where: { id: superAdminRoleId },
     });
@@ -19,10 +20,10 @@ const resetSuperAdmin = async (req, res, next) => {
 
       for (const user of superAdminUsers) {
         await accessTokens.destroy({
-          where: { id: user.id },
+          where: { userId: user.id },
         });
         await refreshTokens.destroy({
-          where: { id: user.id },
+          where: { userId: user.id },
         });
       }
 

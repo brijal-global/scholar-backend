@@ -34,11 +34,6 @@ const changeMyPassword = async (req, res, next) => {
       );
     }
 
-    const userType = userData?.user?.userType;
-    const model = models[userType];
-
-    if (!model) throw new HttpException(404, "User model not found!", "auth");
-
     const isPasswordValid = await verifyHashedPassword(
       currentPassword,
       userData?.password,
@@ -49,7 +44,7 @@ const changeMyPassword = async (req, res, next) => {
     }
 
     const hashedPassword = await hashPassword(newPassword);
-    await model.update(
+    await models.users.update(
       { password: hashedPassword },
       {
         where: { id: userData.id },

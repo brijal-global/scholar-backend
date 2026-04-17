@@ -34,5 +34,9 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Modules.associate = (models) => {
+    Modules.belongsTo(models.programs, { foreignKey: "programId", as: "program" });
+  };
+
   return Modules;
 };

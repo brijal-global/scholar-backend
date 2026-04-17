@@ -20,8 +20,8 @@ export default (sequelize, DataTypes) => {
 
   AccessTokens.associate = (models) => {
     AccessTokens.belongsTo(models.users, {
-      foreignKey: "id",
-      as: "users",
+      foreignKey: "userId",
+      as: "user",
     });
   };
 

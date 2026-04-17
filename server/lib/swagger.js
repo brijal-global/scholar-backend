@@ -283,10 +283,6 @@ export const setupSwagger = (app) => {
         title: `${server.appName} API Documentation`,
         version: "1.0.0",
         description: `Automatically generated API documentation for ${server.appName}`,
-        contact: {
-          name: "API Support",
-          url: "https://github.com/Pushkarcdn/neoX.js",
-        },
       },
       servers: [
         {

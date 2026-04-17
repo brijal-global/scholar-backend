@@ -38,5 +38,10 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  StudentRemarks.associate = (models) => {
+    StudentRemarks.belongsTo(models.studentDetails, { foreignKey: "studentId", as: "student" });
+    StudentRemarks.belongsTo(models.users, { foreignKey: "teacherId", as: "teacher" });
+  };
+
   return StudentRemarks;
 };

@@ -26,5 +26,10 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  StudentDetails.associate = (models) => {
+    StudentDetails.belongsTo(models.users, { foreignKey: "userId", as: "user" });
+    StudentDetails.belongsTo(models.groups, { foreignKey: "groupId", as: "group" });
+  };
+
   return StudentDetails;
 };

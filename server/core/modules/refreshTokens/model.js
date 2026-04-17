@@ -20,8 +20,8 @@ export default (sequelize, DataTypes) => {
 
   RefreshTokens.associate = (models) => {
     RefreshTokens.belongsTo(models.users, {
-      foreignKey: "id",
-      as: "users",
+      foreignKey: "userId",
+      as: "user",
     });
   };
 

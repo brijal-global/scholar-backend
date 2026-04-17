@@ -38,5 +38,10 @@ export default (sequelize, DataTypes) => {
     },
   });
 
+  Groups.associate = (models) => {
+    Groups.belongsTo(models.batches, { foreignKey: "batchId", as: "batch" });
+    Groups.belongsTo(models.users, { foreignKey: "supervisorId", as: "supervisor" });
+  };
+
   return Groups;
 };
