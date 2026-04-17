@@ -3,7 +3,10 @@ import fs from "fs";
 import { pathToFileURL } from "url";
 
 export default async (router) => {
-  const routeDirectories = ["server/core", "src/modules"];
+  // src/modules routes must be collected first so their handlers are registered
+  // before the generic catch-all handlers in server/core/common (get/post/put/delete).
+  // Express matches routes in registration order, so custom routes must come first.
+  const routeDirectories = ["src/modules", "server/core"];
 
   let routes = [];
 
@@ -29,28 +32,22 @@ export default async (router) => {
   // Log all routes
   console.info("Routes detected: ", routes);
 
-  // Import and attach routes
-  await (async () => {
+  // Import and attach routes sequentially to guarantee registration order.
+  // Using Promise.all would cause non-deterministic registration order because
+  // microtask resolution order is not guaranteed across concurrent imports.
+  for (const filePath of routes) {
     try {
-      await Promise.all(
-        routes.map(async (filePath) => {
-          try {
-            const fileUrl = pathToFileURL(filePath).href;
-            const module = await import(fileUrl);
-            if (typeof module.default === "function") {
-              module.default(router);
-            } else {
-              console.error(`\nError loading route: ${filePath}`);
-            }
-          } catch (error) {
-            console.error(`\nError loading route: ${filePath}`, error);
-          }
-        }),
-      );
-    } catch (err) {
-      console.error("Error loading routes:", err);
+      const fileUrl = pathToFileURL(filePath).href;
+      const module = await import(fileUrl);
+      if (typeof module.default === "function") {
+        module.default(router);
+      } else {
+        console.error(`\nError loading route: ${filePath}`);
+      }
+    } catch (error) {
+      console.error(`\nError loading route: ${filePath}`, error);
     }
-  })();
+  }
 
   return router;
 };
