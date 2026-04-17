@@ -12,12 +12,12 @@ const { users, roles, studentDetails } = models;
 export default (router) => {
   /**
    * GET /api/students-with-info
-   * Query: groupId (single) OR groupIds[] (multiple)
-   * Returns studentDetails joined with user info (name, email, etc.)
+   * Query: groupId (single) OR groupIds[] (multiple), page, limit
+   * Returns paginated studentDetails joined with user info (name, email, etc.)
    */
   router.get("/students-with-info", async (req, res, next) => {
     try {
-      const { groupId, limit = 500 } = req.query;
+      const { groupId } = req.query;
       let groupIds = req.query.groupIds || [];
       if (typeof groupIds === "string") groupIds = [groupIds];
 
@@ -28,12 +28,19 @@ export default (router) => {
           .json({ success: false, message: "groupId or groupIds is required" });
       }
 
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(
+        500,
+        Math.max(1, parseInt(req.query.limit, 10) || 20),
+      );
+      const offset = (page - 1) * limit;
+
       const whereClause =
         idList.length === 1
           ? { groupId: idList[0] }
           : { groupId: { [Op.in]: idList } };
 
-      const records = await models.studentDetails.findAll({
+      const { count, rows } = await models.studentDetails.findAndCountAll({
         where: whereClause,
         include: [
           {
@@ -51,10 +58,13 @@ export default (router) => {
           },
         ],
         order: [["createdAt", "ASC"]],
-        limit: Number(limit),
+        limit,
+        offset,
       });
 
-      const result = records.map((sd) => ({
+      const totalPages = Math.ceil(count / limit);
+
+      const result = rows.map((sd) => ({
         id: sd.id,
         userId: sd.userId,
         groupId: sd.groupId,
@@ -74,7 +84,16 @@ export default (router) => {
 
       return successResponse(
         res,
-        result,
+        {
+          rows: result,
+          pagination: {
+            totalCount: count,
+            totalPages,
+            currentPage: page,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+          },
+        },
         "Students fetched successfully",
         "students-with-info",
       );
