@@ -6,10 +6,21 @@ import successResponse from "../../../utils/responses/successResponse.js";
 import { frontend, jwtConfig } from "../../../../configs/env.config.js";
 import { signAccessToken, signRefreshToken } from "../../../lib/jwt.js";
 import { verifyHashedPassword } from "../../../lib/bcrypt.js";
-import { cookieConfig, models } from "../../../../configs/server.config.js";
+import {
+  cookieConfig,
+  models,
+  ids,
+} from "../../../../configs/server.config.js";
 import { convertJwtTimeToSeconds } from "../../../utils/helpers/timeFormatters.js";
 
-const { users, roles, accessTokens, refreshTokens } = models;
+const {
+  users,
+  roles,
+  accessTokens,
+  refreshTokens,
+  organizationEmployees,
+  colleges,
+} = models;
 
 const signInUser = async (req, res, next) => {
   try {
@@ -50,6 +61,34 @@ const signInUser = async (req, res, next) => {
         "This account is not active. Please contact support or your administrator.",
         "auth.signin",
       );
+    }
+
+    if (existingUser?.roleId === ids.organizationEmployeeRoleId) {
+      const employeeRecord = await organizationEmployees.findOne({
+        where: { userId: existingUser.id },
+        include: [
+          {
+            model: colleges,
+            as: "college",
+            attributes: ["id", "name", "isActive"],
+            required: true,
+          },
+        ],
+      });
+
+      if (!employeeRecord) {
+        throw new ForbiddenException(
+          "Your account is not linked to any college. Please contact your administrator.",
+          "auth.signin",
+        );
+      }
+
+      if (employeeRecord.college?.isActive !== true) {
+        throw new ForbiddenException(
+          "The college associated with your account is currently inactive. Please contact support.",
+          "auth.signin",
+        );
+      }
     }
 
     processAuth(req, res, next, existingUser, "response");
