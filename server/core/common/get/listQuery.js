@@ -42,7 +42,7 @@ export function buildPaginatedListQuery(query = {}, config = {}) {
     buildSearchWhere,
     statusField = "status",
     defaultLimit = 10,
-    maxLimit = 100,
+    maxLimit = 100000000,
     defaultSortBy = "createdAt",
     defaultSortOrder = "DESC",
     allowedSortFields = null,

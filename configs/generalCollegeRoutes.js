@@ -167,4 +167,12 @@ export default [
     methods: ["GET"],
     route: "/api/users/:id",
   },
+  {
+    methods: ["GET"],
+    route: "/api/load-dummy-data",
+  },
+  {
+    methods: ["GET"],
+    route: "/api/student-analytics/:studentDetailId",
+  },
 ];
