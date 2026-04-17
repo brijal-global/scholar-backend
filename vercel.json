@@ -11,5 +11,6 @@
     "api/vercel.js": {
       "includeFiles": "**/*"
     }
-  }
+  },
+  "installCommand": "npm install --production --no-optional"
 }
