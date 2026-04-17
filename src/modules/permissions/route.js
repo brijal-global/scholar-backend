@@ -292,7 +292,7 @@ export default (router) => {
 
         return successResponse(
           res,
-          null,
+          {},
           "Permissions saved",
           "college-custom-role-permissions/batch",
         );

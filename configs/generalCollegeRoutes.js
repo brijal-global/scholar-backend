@@ -112,6 +112,10 @@ export default [
     route: "/api/organization-employees-with-info",
   },
   {
+    methods: ["POST"],
+    route: "/api/organization-employees/create-or-link",
+  },
+  {
     methods: ["GET"],
     route: "/api/plan-modules",
   },
